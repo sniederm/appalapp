@@ -26,9 +26,17 @@ Sammlung kleiner, eigenständiger Lern-Webapps. Die Übersichtsseite `index.html
 
 `python3 -m http.server 8000` im Repo-Root, dann http://localhost:8000. (`index.html` funktioniert auch per Doppelklick.)
 
+## Schriften (DSGVO)
+
+Die Seite lädt keine Schriften von Google. Alle Fonts liegen lokal in `fonts/`, jede App bindet `fonts/fonts.css` relativ ein
+(`../../../fonts/fonts.css`). Neue Schrift verwenden: Familie in `scripts/fetch-fonts.mjs` ergänzen und
+`node scripts/fetch-fonts.mjs` ausführen. Keine externen CDNs, Tracker oder Einbettungen verwenden.
+
 ## Aufbau
 
 ```
+impressum.html, datenschutz.html   rechtliche Pflichtseiten (Platzhalter ausfüllen!)
+fonts/                lokale Schriften + fonts.css
 index.html            Übersichtsseite (rendert window.APPS, Suche + Fachfilter)
 apps.js               generiert aus allen app.json
 scripts/build-index.mjs

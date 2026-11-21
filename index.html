@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Appalapp – Lernapps</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root{--ink:#1d2340;--muted:#5b6180;--bg:#fff8ef;--line:#d9dcea;--blue:#2457c5;--yellow:#ffc533;--red:#e2412b}
   *{box-sizing:border-box}
@@ -43,6 +42,8 @@
   .tags{font-size:13px;font-weight:700;color:var(--muted)}
   .go{font-weight:900;color:var(--blue)}
   .empty{text-align:center;color:var(--muted);font-weight:800;padding:40px 0}
+  .legal{margin-top:6px}
+  .legal a{color:var(--muted)}
   footer{text-align:center;margin-top:40px;color:var(--muted);font-weight:700;font-size:14px}
 </style>
 </head>
@@ -63,7 +64,7 @@
 
   <main class="grid" id="grid"></main>
   <div class="empty" id="empty" hidden>Nichts gefunden 🤷</div>
-  <footer id="count"></footer>
+  <footer><div id="count"></div><div class="legal"><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></div></footer>
 </div>
 
 <script src="apps.js"></script>
