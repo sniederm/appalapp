@@ -35,7 +35,7 @@ Die Seite lädt keine Schriften von Google. Alle Fonts liegen lokal in `fonts/`,
 ## Aufbau
 
 ```
-impressum.html, datenschutz.html   rechtliche Pflichtseiten (Platzhalter ausfüllen!)
+datenschutz.html, nutzungsvereinbarung.html   rechtliche Seiten (Platzhalter ausfüllen!)
 fonts/                lokale Schriften + fonts.css
 index.html            Übersichtsseite (rendert window.APPS, Suche + Fachfilter)
 apps.js               generiert aus allen app.json
