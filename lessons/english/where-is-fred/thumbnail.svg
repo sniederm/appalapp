@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#E8EDF2"/>
+  <g font-family="Nunito,system-ui,sans-serif" font-weight="800" text-anchor="middle">
+    <text x="320" y="70" font-size="44" fill="#1B2233">Fred is <tspan fill="#D7262B">behind</tspan> the box.</text>
+    <rect x="110" y="110" width="420" height="200" rx="24" fill="#fff"/>
+    <ellipse cx="320" cy="290" rx="150" ry="14" fill="#D5DCE5"/>
+    <!-- Fred -->
+    <g transform="translate(385 285)">
+      <rect x="-14" y="-62" width="9" height="30" rx="3" fill="#22305A"/>
+      <rect x="4" y="-62" width="9" height="30" rx="3" fill="#22305A"/>
+      <rect x="-20" y="-110" width="40" height="52" rx="10" fill="#D7262B"/>
+      <circle cx="0" cy="-132" r="22" fill="#F2C9A0"/>
+      <path d="M-23 -138 a23 23 0 0 1 46 0z" fill="#F5C518"/>
+      <circle cx="-7" cy="-130" r="2.8" fill="#1B2233"/><circle cx="8" cy="-130" r="2.8" fill="#1B2233"/>
+    </g>
+    <!-- Kiste -->
+    <rect x="215" y="190" width="150" height="100" rx="6" fill="#CFA164"/>
+    <rect x="215" y="190" width="150" height="22" fill="#E2BC85"/>
+    <rect x="215" y="270" width="150" height="20" fill="#A87A3E"/>
+    <rect x="278" y="190" width="24" height="100" fill="#A87A3E" opacity=".55"/>
+    <!-- Kärtchen -->
+    <g font-size="26">
+      <rect x="40" y="335" width="110" height="46" rx="14" fill="#F3F5F8" stroke="#C8D0DB" stroke-width="3"/><text x="95" y="367" fill="#1B2233">under</text>
+      <rect x="265" y="335" width="110" height="46" rx="14" fill="#F5C518"/><text x="320" y="367" fill="#1B2233">behind</text>
+      <rect x="490" y="335" width="110" height="46" rx="14" fill="#F3F5F8" stroke="#C8D0DB" stroke-width="3"/><text x="545" y="367" fill="#1B2233">next to</text>
+    </g>
+  </g>
+</svg>

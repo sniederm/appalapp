@@ -1,0 +1,9 @@
+{
+  "title": "Rechnen am Zahlenstrahl",
+  "description": "Addition und Subtraktion bis 20 am Zahlenstrahl: Zahlen eintippen, Platzhalter x nutzen und die Punkte selbst verschieben.",
+  "subject": "Mathe",
+  "level": "Klasse 5",
+  "tags": ["Addition", "Subtraktion", "Zahlenstrahl"],
+  "thumbnail": "thumbnail.svg",
+  "added": "2026-11-21"
+}

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rechnen am Zahlenstrahl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E4E9EE; --board:#FFFFFF; --frame:#AAB4BF; --ink:#1E2833; --muted:#5A6672;
+  --green:#2E8A57; --red:#C2352B; --blue:#2356B5; --btn:#EEF2F6; --btn-hover:#DFE6ED; --tick:#8A96A2;
+  --ca:#0A6CFF; --cb:#00B23C; --cc:#FF7A00;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121816; --board:#22302B; --frame:#7A6448; --ink:#ECF2EE; --muted:#A8B6AF;
+    --green:#7DD9A3; --red:#FF8F80; --blue:#97BBFF; --btn:#2E3E38; --btn-hover:#3A4C45; --tick:#7F8F88;
+    --ca:#3D9BFF; --cb:#2EE86B; --cc:#FF9A1F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121816; --board:#22302B; --frame:#7A6448; --ink:#ECF2EE; --muted:#A8B6AF;
+  --green:#7DD9A3; --red:#FF8F80; --blue:#97BBFF; --btn:#2E3E38; --btn-hover:#3A4C45; --tick:#7F8F88;
+  --ca:#3D9BFF; --cb:#2EE86B; --cc:#FF9A1F;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size:17px; line-height:1.5;
+}
+main{max-width:1080px; margin:0 auto; padding:28px 16px 48px}
+h1{
+  font-family:"Kalam", "Comic Sans MS", "Bradley Hand", cursive;
+  font-weight:700; font-size:clamp(30px,6vw,44px); line-height:1.1; margin:0 0 8px;
+}
+.lead{margin:0 0 28px; color:var(--muted); max-width:62ch}
+.board{
+  background:var(--board);
+  border:10px solid var(--frame);
+  border-radius:6px;
+  padding:18px 18px 22px;
+  margin:0 0 28px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+}
+h2{
+  font-family:"Kalam", "Comic Sans MS", "Bradley Hand", cursive;
+  font-weight:700; font-size:30px; margin:0;
+  text-decoration:underline double; text-underline-offset:7px; text-decoration-thickness:2px;
+}
+.svgwrap{overflow-x:auto}
+svg.line{display:block; width:100%; min-width:320px; height:auto; touch-action:pan-y; user-select:none; -webkit-user-select:none}
+svg text{font-family:"Kalam", "Comic Sans MS", "Bradley Hand", cursive; fill:var(--ink)}
+.eq{font-size:54px; font-weight:400}
+.name{font-size:21px}
+.small{font-size:19px}
+.tick{font-size:17px; fill:var(--muted); font-family:"Atkinson Hyperlegible", system-ui, sans-serif}
+.tick.hi{fill:var(--ink); font-weight:700; font-size:21px}
+.ink{stroke:var(--ink); fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round}
+.tickline{stroke:var(--tick); stroke-width:2}
+.dash{stroke:var(--green); stroke-width:2; stroke-dasharray:7 6; fill:none; opacity:.85}
+.dash,.dot{transition:opacity .4s ease}
+svg.nodash .dash, svg.nodash .dot{opacity:0}
+.label{transition:opacity .3s ease}
+svg.nolabels .label{opacity:0}
+@media (prefers-reduced-motion: reduce){ .label{transition:none} }
+@media (prefers-reduced-motion: reduce){ .dash,.dot{transition:none} }
+.arc{fill:none; stroke-width:3.5; stroke-linecap:round}
+.ghost .arc{stroke:var(--tick)}
+.ghost polygon, .ghost circle, .ghost text{fill:var(--tick)}
+.ghost .ghring{fill:var(--board); stroke:var(--tick); stroke-width:3.5}
+svg.drafting .live{opacity:0 !important; pointer-events:none}
+svg.noline .live, svg.noline .ghost{display:none}
+svg.drafting .tick{fill:var(--muted) !important; font-weight:400 !important; font-size:17px !important}
+.hop{fill:none; stroke-width:2.5; stroke-linecap:round}
+.arclabel{font-size:30px; font-weight:700}
+.xsol{font-size:32px; font-weight:700}
+.hoplabel{font-size:16px; font-weight:700}
+.ring{fill:var(--board); stroke:var(--ca); stroke-width:3.5}
+.hit{fill:transparent; cursor:grab; touch-action:none; outline:none}
+.hit:active{cursor:grabbing}
+.focusring{fill:none; stroke:var(--green); stroke-width:3; opacity:0}
+.handle:focus-visible .focusring{opacity:1}
+.handle{outline:none}
+.fa{fill:var(--ca)} .fb{fill:var(--cb)} .fc{fill:var(--cc)}
+.sa{stroke:var(--ca)} .sb{stroke:var(--cb)} .sc{stroke:var(--cc)}
+.tick.hi.hia{fill:var(--ca)} .tick.hi.hic{fill:var(--cc)}
+@media (max-width:560px){ .tick.odd:not(.hi){display:none} }
+
+.stage{position:relative; min-width:320px; container-type:inline-size}
+.eqbox{
+  position:absolute; transform:translateX(-50%); width:1.7em; font-size:6.75cqw;
+  display:flex; flex-direction:column; align-items:stretch;
+  border:2px dashed currentColor; border-radius:10px; overflow:hidden; background:var(--board);
+}
+.eqbox.ia{color:var(--ca)} .eqbox.ib{color:var(--cb)} .eqbox.ic{color:var(--cc)}
+.eqbox:focus-within{border-style:solid}
+.eqbox.bad{border-color:var(--red)}
+.eqin{
+  display:block; width:100%; height:1.15em;
+  font-family:"Kalam", "Comic Sans MS", cursive; font-size:1em; line-height:1;
+  text-align:center; color:inherit; background:transparent; border:0; border-radius:0;
+  padding:.19em 0 0; margin:0; min-height:0; min-width:0; cursor:text;
+}
+.eqin:hover, .eqin:focus{outline:none; background:var(--btn)}
+.eqbtn{
+  display:block; width:100%; min-height:0; min-width:0;
+  font:700 .42em/1 "Atkinson Hyperlegible", system-ui, sans-serif; height:1.19em;
+  padding:0; margin:0; border:0; border-radius:0; color:inherit; cursor:pointer;
+  background:color-mix(in srgb, currentColor 13%, transparent);
+}
+.eqbtn:hover:not(:disabled){background:color-mix(in srgb, currentColor 26%, transparent)}
+.eqbtn:focus-visible{outline:3px solid currentColor; outline-offset:-4px}
+.eqbtn:disabled{opacity:.3; cursor:not-allowed}
+.eqbox:not(.open) .eqbtn{display:none}
+.eqbox.open{margin-top:-.5em; z-index:2; box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.hint{color:var(--red); font-weight:700; min-height:1.5em; margin:4px 0 0; max-width:66ch}
+.board{position:relative}
+.fsbtn{
+  position:absolute; top:10px; right:10px; min-width:38px; min-height:38px; padding:0;
+  display:grid; place-items:center; color:var(--muted); background:transparent;
+  border:1px solid transparent; border-radius:8px;
+}
+.fsbtn:hover:not(:disabled){background:var(--btn); color:var(--ink)}
+.fsbtn svg{width:20px; height:20px; display:block}
+.fsbtn .i-close{display:none}
+.board.is-fs .fsbtn .i-open{display:none}
+.board.is-fs .fsbtn .i-close{display:block}
+.board.is-fs{
+  margin:0; width:100%; height:100%; border-radius:0; overflow:auto;
+  display:flex; flex-direction:column; background:var(--board);
+  padding:max(14px, env(safe-area-inset-top, 0px)) 20px max(16px, env(safe-area-inset-bottom, 0px));
+}
+.board.pseudo{position:fixed; inset:0; z-index:100}
+.board.is-fs .fsbtn{top:max(10px, env(safe-area-inset-top, 0px))}
+.boardgrid{display:grid; grid-template-columns:minmax(0,1fr) 150px; gap:16px; align-items:start; margin-top:6px}
+.board.is-fs .boardgrid{flex:1; grid-template-columns:minmax(0,1fr) 170px}
+.board.is-fs .stage{max-width:calc((100vh - 200px) * 1.7); max-width:calc((100dvh - 200px) * 1.7); margin:0 auto}
+.board.is-fs .histlist{max-height:calc(100dvh - 160px)}
+@media (max-width:760px){ .board.is-fs .boardgrid{grid-template-columns:1fr} .board.is-fs .histlist{max-height:220px} }
+.boardmain{min-width:0}
+.history{border-left:1px solid color-mix(in srgb, var(--frame) 60%, transparent); padding-left:12px; min-width:0; color:var(--muted)}
+.histhead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 8px}
+.history h3{font-family:"Kalam", "Comic Sans MS", cursive; font-weight:400; font-size:18px; margin:0; color:var(--muted)}
+.histclear{min-height:28px; min-width:0; padding:0 8px; font-size:12px; color:var(--muted); background:transparent; border:1px solid color-mix(in srgb, var(--frame) 60%, transparent)}
+.histlist{list-style:none; margin:0; padding:0; max-height:380px; overflow-y:auto; display:flex; flex-direction:column; gap:4px}
+.histitem{
+  display:block; width:100%; min-height:30px; text-align:left;
+  font-family:"Kalam", "Comic Sans MS", cursive; font-size:17px; line-height:1.1;
+  padding:3px 8px; background:transparent; border:1px solid transparent; border-radius:6px; color:var(--muted);
+}
+.histitem.active{color:var(--ink); background:var(--btn)}
+@media (max-width:760px){
+  .boardgrid{grid-template-columns:1fr}
+  .history{border-left:0; border-top:2px dashed var(--frame); padding:10px 0 0}
+  .histlist{max-height:220px}
+}
+.controls{display:flex; flex-wrap:wrap; gap:6px 12px; align-items:flex-start; font-size:14px; color:var(--muted)}
+.controls .actions{margin-left:auto}
+button{
+  font:inherit; color:var(--ink); background:var(--btn);
+  border:2px solid var(--frame); border-radius:10px;
+  min-height:44px; min-width:44px; padding:0 14px; cursor:pointer;
+}
+button:hover:not(:disabled){background:var(--btn-hover)}
+button:focus-visible{outline:3px solid var(--green); outline-offset:2px}
+button:disabled{opacity:.4; cursor:not-allowed}
+.actions{display:flex; gap:4px; flex-wrap:wrap}
+button.calc{min-height:40px; min-width:0; padding:0 22px; font-size:16px; font-weight:700; color:var(--board); background:var(--ink); border:2px solid var(--ink); border-radius:10px}
+button.calc:hover:not(:disabled){background:var(--ink); opacity:.85}
+button.calc:disabled{opacity:.25; cursor:default}
+button.quiet{min-height:36px; min-width:0; padding:0 10px; font-size:14px; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:8px}
+button.quiet:hover:not(:disabled){background:var(--btn); color:var(--ink)}
+.settings summary{
+  cursor:pointer; min-height:36px; display:inline-flex; align-items:center; gap:6px;
+  padding:0 10px; border-radius:8px; list-style:none; user-select:none; -webkit-user-select:none;
+}
+.settings summary::-webkit-details-marker{display:none}
+.settings summary::before{content:"▸"; font-size:11px; transition:transform .2s}
+.settings[open] summary::before{transform:rotate(90deg)}
+.settings summary:hover{background:var(--btn); color:var(--ink)}
+.settings summary:focus-visible{outline:3px solid var(--green); outline-offset:2px}
+.settings-panel{display:flex; flex-wrap:wrap; gap:0 18px; padding:2px 10px 0}
+.switch{display:inline-flex; align-items:center; gap:8px; min-height:36px; cursor:pointer; user-select:none; -webkit-user-select:none}
+.switch input{
+  appearance:none; -webkit-appearance:none; position:relative; flex:none;
+  width:34px; height:20px; margin:0; border-radius:10px; cursor:pointer;
+  background:var(--btn); border:1.5px solid var(--frame); transition:background .2s;
+}
+.switch input::after{
+  content:""; position:absolute; top:2px; left:2px; width:13px; height:13px; border-radius:50%;
+  background:var(--muted); transition:transform .2s, background .2s;
+}
+.switch input:checked{background:var(--muted); border-color:var(--muted)}
+.switch input:checked::after{transform:translateX(14px); background:var(--board)}
+.switch input:focus-visible{outline:3px solid var(--green); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ .switch input, .switch input::after{transition:none} }
+@media (max-width:560px){ .actions{margin-left:0} }
+.note{color:var(--muted); font-size:15px; max-width:66ch}
+</style>
+</head>
+<body>
+<main>
+  <h1>Rechnen am Zahlenstrahl</h1>
+  <p class="lead">Tipp oben in der Rechnung auf eine Zahl mit gestricheltem Rahmen und schreib eine neue hinein. Mit einem x statt einer Zahl rechnest du mit einem Platzhalter. Du kannst auch die Punkte auf dem Zahlenstrahl ziehen.</p>
+
+  <section class="board" id="board-sub" aria-labelledby="h-sub">
+    <h2 id="h-sub">Subtraktion</h2>
+    <div class="svgwrap" data-svg></div>
+    <div class="controls" data-controls></div>
+  </section>
+
+  <section class="board" id="board-add" aria-labelledby="h-add">
+    <h2 id="h-add">Addition</h2>
+    <div class="svgwrap" data-svg></div>
+    <div class="controls" data-controls></div>
+  </section>
+
+  <p class="note">Tipp: Auf einem Zahlenstrahl ist jeder Schritt gleich lang. Das hilft beim Zeichnen im Heft: zum Beispiel 1 Kästchen pro Zahl.</p>
+</main>
+
+<script>
+(function(){
+  const MAX = 20, U = 34, X0 = 50, Y = 400, H = 470;
+  const NS = "http://www.w3.org/2000/svg";
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const X = v => X0 + v * U;
+  const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const scaleIn = t => t >= 1 ? 1 : Math.max(.001, (1 - Math.pow(1 - t, 3)) * (1 + .35 * Math.sin(Math.PI * t)));
+  function el(tag, attrs, parent){
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function div(cls){ const d = document.createElement("div"); d.className = cls; return d; }
+
+  const configs = [
+    { id:"sub", sign:-1, opChar:"−", invChar:"+", a:5, b:3, cls:"sub",
+      names:{a:"Minuend", b:"Subtrahend", c:"Wert der Differenz", c1:"Wert der", c2:"Differenz", brace:"Differenz"} },
+    { id:"add", sign:1, opChar:"+", invChar:"−", a:4, b:2, cls:"add",
+      names:{a:"1. Summand", b:"2. Summand", c:"Wert der Summe", c1:"Wert der", c2:"Summe", brace:"Summe"} }
+  ];
+
+  let running = false;
+  const panels = configs.map(build);
+  panels.forEach(p => render(p, performance.now()));
+
+  /* ---------- building ---------- */
+
+  function build(cfg){
+    const root = document.getElementById("board-" + cfg.id);
+    const p = Object.assign({}, cfg);
+    p.def = {a:cfg.a, b:cfg.b};
+    p.to = {a:cfg.a, b:cfg.b};
+    p.disp = {a:cfg.a, b:cfg.b};
+    p.from = {a:cfg.a, b:cfg.b};
+    p.unk = "c";
+    p.t0 = 0; p.dur = 0; p.step = null; p.seq = null; p.drag = null;
+
+    const wrap = root.querySelector("[data-svg]");
+    const stage = div("stage");
+    wrap.appendChild(stage);
+    const svg = el("svg", {viewBox:`0 0 800 ${H}`, class:"line nodash " + cfg.cls, role:"group",
+      "aria-label":"Zahlenstrahl von 0 bis " + MAX});
+    stage.appendChild(svg);
+    p.svg = svg;
+    p.hint = document.createElement("p");
+    p.hint.className = "hint";
+    p.hint.setAttribute("aria-live", "polite");
+    wrap.after(p.hint);
+
+    // dashed helper lines
+    const gDash = el("g", {class:"live"}, svg);
+    p.gLA = el("g", {}, gDash); p.dA = el("line", {class:"dash sa"}, p.gLA); p.dotA = el("circle", {r:3.5, class:"fa dot"}, p.gLA);
+    p.gLB = el("g", {style:"display:none"}, gDash); p.dB = el("line", {class:"dash sb"}, p.gLB); p.dotB = el("circle", {r:3.5, class:"fb dot"}, p.gLB);
+    p.gLC = el("g", {}, gDash); p.dC = el("line", {class:"dash sc"}, p.gLC); p.dotC = el("circle", {r:3.5, class:"fc dot"}, p.gLC);
+
+    // names
+    el("text", {x:300, y:54, "text-anchor":"middle", class:"name fa label"}, svg).textContent = cfg.names.a;
+    el("text", {x:430, y:54, "text-anchor":"middle", class:"name fb label"}, svg).textContent = cfg.names.b;
+    const tc = el("text", {x:622, y:72, class:"small fc label"}, svg);
+    el("tspan", {x:622, dy:0}, tc).textContent = cfg.names.c1;
+    el("tspan", {x:622, dy:22}, tc).textContent = cfg.names.c2;
+    el("path", {d:"M616 84 L594 97", class:"ink sc label", "stroke-width":2}, svg);
+
+    // equation (operator, equals sign, computed value)
+    el("text", {x:365, y:119, "text-anchor":"middle", class:"eq"}, svg).textContent = cfg.opChar;
+    el("text", {x:495, y:119, "text-anchor":"middle", class:"eq"}, svg).textContent = "=";
+    p.tC = el("text", {x:562, y:119, "text-anchor":"middle", class:"eq fc"}, svg);
+    p.tX = el("text", {x:622, y:142, class:"xsol"}, svg);
+
+    // brace
+    el("path", {d:"M250 146 Q250 158 262 158 L353 158 Q365 158 365 170 Q365 158 377 158 L468 158 Q480 158 480 146", class:"ink label", "stroke-width":2.2}, svg);
+    el("text", {x:365, y:196, "text-anchor":"middle", class:"small label"}, svg).textContent = cfg.names.brace;
+
+    // axis
+    el("line", {x1:X(0), y1:Y-15, x2:X(0), y2:Y+15, class:"ink"}, svg);
+    el("line", {x1:X(0), y1:Y, x2:778, y2:Y, class:"ink"}, svg);
+    el("polyline", {points:`764,${Y-9} 779,${Y} 764,${Y+9}`, class:"ink"}, svg);
+    p.ticks = [];
+    for (let v = 0; v <= MAX; v++){
+      if (v > 0) el("line", {x1:X(v), y1:Y-7, x2:X(v), y2:Y+7, class:"tickline"}, svg);
+      const t = el("text", {x:X(v), y:Y+34, "text-anchor":"middle", class:"tick" + (v % 2 ? " odd" : "")}, svg);
+      t.textContent = v;
+      p.ticks.push(t);
+    }
+    p.xMark = el("text", {x:X(0), y:Y+64, "text-anchor":"middle", class:"xsol fa live"}, svg);
+    p.xMark.textContent = "x";
+    p.xMark.style.opacity = 0;
+
+    // previous state, shown in grey while the new one is drawn
+    p.gGhost = el("g", {class:"ghost"}, svg);
+    p.gGhost.style.opacity = 0;
+    p.ghArc = el("path", {class:"arc"}, p.gGhost);
+    p.ghHead = el("polygon", {}, p.gGhost);
+    p.ghLabel = el("text", {"text-anchor":"middle", class:"arclabel"}, p.gGhost);
+    p.ghStart = el("circle", {r:9, class:"ghring"}, p.gGhost);
+    p.ghEnd = el("circle", {r:10}, p.gGhost);
+    p.ghost = null;
+
+    // forward jump arrow
+    p.gArc = el("g", {class:"live"}, svg);
+    p.arc = el("path", {class:"arc sb"}, p.gArc);
+    p.head = el("polygon", {class:"fb"}, p.gArc);
+    p.arcLabel = el("text", {"text-anchor":"middle", class:"arclabel fb"}, p.gArc);
+    // reverse arrow (Umkehraufgabe)
+    p.gRev = el("g", {class:"live"}, svg);
+    p.rarc = el("path", {class:"arc sb"}, p.gRev);
+    p.rhead = el("polygon", {class:"fb"}, p.gRev);
+    p.rlabel = el("text", {"text-anchor":"middle", class:"arclabel fb"}, p.gRev);
+
+    p.gHops = el("g", {class:"live"}, svg);
+
+    p.hStart = makeHandle(p, "start");
+    p.hEnd = makeHandle(p, "end");
+
+    svg.addEventListener("pointermove", e => { if (p.drag) onDrag(p, e); });
+    const stop = () => {
+      if (!p.drag) return;
+      p.drag = null;
+      const s = p.dragStart;
+      if (s && (s.a !== p.to.a || s.b !== p.to.b)){ startSeq(p, p.to.a, s, p.dragUnk); markHist(p); }
+      else if (p.ghost && p.dragGhost){ p.ghost.hold = performance.now() - p.ghost.t0; kick(); }
+    };
+    svg.addEventListener("pointerup", stop);
+    svg.addEventListener("pointercancel", stop);
+
+    // equation boxes
+    p.btn = {}; p.inp = {}; p.box = {};
+    makeBox(p, "a", 300, stage);
+    makeBox(p, "b", 430, stage);
+    makeBox(p, "c", 562, stage);
+
+    // controls: quiet actions + collapsible settings
+    const ctr = root.querySelector("[data-controls]");
+    const mkSwitch = (text, on, fn) => {
+      const l = document.createElement("label");
+      l.className = "switch";
+      l.innerHTML = `<input type="checkbox" role="switch"${on ? " checked" : ""}><span>${text}</span>`;
+      const i = l.querySelector("input");
+      i.addEventListener("change", () => fn(i.checked));
+      return l;
+    };
+    const set = document.createElement("details");
+    set.className = "settings";
+    set.innerHTML = `<summary>Einstellungen</summary>`;
+    const panel = div("settings-panel");
+    p.keepGhost = false;
+    const setLine = on => {
+      const h = on ? H : 215;
+      svg.setAttribute("viewBox", `0 0 800 ${h}`);
+      svg.classList.toggle("noline", !on);
+      ["a","b","c"].forEach(k => { p.box[k].style.top = (67 / h * 100) + "%"; });
+    };
+    panel.append(
+      mkSwitch("Zahlenstrahl", true, setLine),
+      mkSwitch("Hilfslinien", false, on => svg.classList.toggle("nodash", !on)),
+      mkSwitch("Fachbegriffe", true, on => svg.classList.toggle("nolabels", !on)),
+      mkSwitch("Vorgänger stehen lassen", false, on => {
+        p.keepGhost = on;
+        if (!on && p.ghost) p.ghost.hold = performance.now() - p.ghost.t0;
+        kick();
+      })
+    );
+    set.appendChild(panel);
+    const act = div("actions");
+    const bStep = document.createElement("button");
+    bStep.type = "button"; bStep.className = "quiet"; bStep.textContent = "Schritt für Schritt";
+    bStep.addEventListener("click", () => startSteps(p));
+    const bReset = document.createElement("button");
+    bReset.type = "button"; bReset.className = "quiet"; bReset.textContent = "Zurücksetzen";
+    bReset.addEventListener("click", () => resetBlank(p));
+    act.append(bStep, bReset);
+    p.bCalc = document.createElement("button");
+    p.bCalc.type = "button"; p.bCalc.className = "calc"; p.bCalc.textContent = "Rechne";
+    p.bCalc.addEventListener("click", () => applyDraft(p));
+    p.draft = null;
+    ctr.append(p.bCalc, set, act);
+
+    // layout with history
+    const grid = div("boardgrid");
+    const left = div("boardmain");
+    left.append(wrap, p.hint, ctr);
+    const aside = document.createElement("aside");
+    aside.className = "history";
+    aside.setAttribute("aria-label", "Verlauf der Gleichungen");
+    aside.innerHTML = `<div class="histhead"><h3>Verlauf</h3><button type="button" class="histclear">Löschen</button></div><ol class="histlist"></ol>`;
+    p.histList = aside.querySelector("ol");
+    aside.querySelector(".histclear").addEventListener("click", () => {
+      p.hist = p.blank ? [] : [{a:p.to.a, b:p.to.b, u:p.unk}];
+      p.histActive = p.blank ? -1 : 0;
+      renderHist(p);
+    });
+    grid.append(left, aside);
+    root.appendChild(grid);
+
+    // fullscreen toggle (real fullscreen where allowed, otherwise an overlay)
+    const fsb = document.createElement("button");
+    fsb.type = "button"; fsb.className = "fsbtn";
+    fsb.setAttribute("aria-label", "Vollbild");
+    const ic = (cls, d) => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+    fsb.innerHTML = ic("i-open", "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5") + ic("i-close", "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5");
+    root.appendChild(fsb);
+    const isReal = () => (document.fullscreenElement || document.webkitFullscreenElement) === root;
+    const syncFs = () => {
+      const on = isReal() || root.classList.contains("pseudo");
+      root.classList.toggle("is-fs", on);
+      fsb.setAttribute("aria-label", on ? "Vollbild beenden" : "Vollbild");
+    };
+    const leavePseudo = () => { root.classList.remove("pseudo"); document.body.style.overflow = ""; syncFs(); };
+    fsb.addEventListener("click", async () => {
+      if (isReal()){ (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+      if (root.classList.contains("pseudo")){ leavePseudo(); return; }
+      const req = root.requestFullscreen || root.webkitRequestFullscreen;
+      try {
+        if (!req) throw new Error("no fullscreen");
+        await req.call(root);
+      } catch (_){
+        root.classList.add("pseudo");
+        document.body.style.overflow = "hidden";
+      }
+      syncFs();
+    });
+    document.addEventListener("fullscreenchange", syncFs);
+    document.addEventListener("webkitfullscreenchange", syncFs);
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && root.classList.contains("pseudo") && e.target.tagName !== "INPUT") leavePseudo();
+    });
+    p.hist = [];
+    p.histActive = -1;
+    p.blank = true;
+    renderHist(p);
+
+    syncControls(p);
+    return p;
+  }
+
+  function makeHandle(p, which){
+    const g = el("g", {class:"handle live", tabindex:0, role:"slider",
+      "aria-label": which === "start" ? "Startpunkt: " + p.names.a : "Zielpunkt: " + p.names.c,
+      "aria-valuemin":0, "aria-valuemax":MAX}, p.svg);
+    el("circle", {r:18, class:"focusring"}, g);
+    if (which === "start") el("circle", {r:9, class:"ring"}, g);
+    else el("circle", {r:10, class:"fc"}, g);
+    const hit = el("circle", {r:26, class:"hit"}, g);
+    hit.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      p.dragStart = {a:p.to.a, b:p.to.b};
+      p.dragUnk = p.unk;
+      p.dragGhost = false;
+      p.drag = which;
+      try { p.svg.setPointerCapture(e.pointerId); } catch(_){}
+      onDrag(p, e);
+    });
+    g.addEventListener("keydown", e => {
+      let d = 0;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") d = 1;
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") d = -1;
+      if (!d) return;
+      e.preventDefault();
+      const cur = which === "start" ? p.to.a : p.to.a + p.sign * p.to.b;
+      moveTo(p, which, cur + d, 500);
+    });
+    return {g};
+  }
+
+  function makeBox(p, k, x, stage){
+    const box = div("eqbox i" + k);
+    box.style.left = (x / 800 * 100) + "%";
+    box.style.top = (67 / H * 100) + "%";
+    const name = p.names[k];
+    const plus = document.createElement("button");
+    plus.type = "button"; plus.className = "eqbtn"; plus.textContent = "+";
+    plus.setAttribute("aria-label", name + " um 1 vergrößern");
+    const minus = document.createElement("button");
+    minus.type = "button"; minus.className = "eqbtn"; minus.textContent = "−";
+    minus.setAttribute("aria-label", name + " um 1 verkleinern");
+    const inp = document.createElement("input");
+    inp.className = "eqin";
+    inp.type = "text";
+    inp.maxLength = 2;
+    inp.autocomplete = "off";
+    inp.spellcheck = false;
+    inp.setAttribute("autocapitalize", "off");
+    inp.setAttribute("aria-label", name + ": Zahl oder x eingeben");
+
+    plus.addEventListener("click", () => { stepSlot(p, k, +1); inp.value = slotStr(p, k); });
+    minus.addEventListener("click", () => { stepSlot(p, k, -1); inp.value = slotStr(p, k); });
+    [plus, minus].forEach(b => b.addEventListener("mousedown", e => e.preventDefault()));
+
+    const commit = () => {
+      const raw = inp.value.trim().toLowerCase();
+      if (raw === "" || raw === slotStr(p, k)) return;
+      if (raw === "x"){
+        setDraft(p, cur(p).a, cur(p).b, k);
+        return;
+      }
+      if (!/^\d{1,2}$/.test(raw)){ showHint(p, `Bitte eine ganze Zahl von 0 bis ${MAX} oder ein x eintippen.`, k); return; }
+      const u = k === cur(p).u ? "c" : cur(p).u;
+      const r = solve(p, k, parseInt(raw, 10), u);
+      if (r.err){ showHint(p, r.err, k); return; }
+      setDraft(p, r.a, r.b, u);
+    };
+    inp.addEventListener("input", () => { if (p.hint.textContent) showHint(p, ""); });
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Enter"){
+        e.preventDefault();
+        commit();
+        inp.value = slotStr(p, k);
+        if (!p.hint.textContent){ applyDraft(p); inp.value = slotStr(p, k); box.classList.remove("open"); inp.blur(); }
+        else inp.select();
+      }
+      else if (e.key === "ArrowUp" || e.key === "ArrowDown"){
+        e.preventDefault();
+        stepSlot(p, k, e.key === "ArrowUp" ? 1 : -1);
+        inp.value = slotStr(p, k);
+      }
+    });
+    inp.addEventListener("focus", () => { box.classList.add("open"); inp.select(); });
+    inp.addEventListener("blur", () => {
+      if (inp.value.trim().toLowerCase() !== slotStr(p, k)) commit();
+      inp.value = slotStr(p, k);
+      box.classList.remove("bad");
+    });
+
+    box.append(plus, inp, minus);
+    box.addEventListener("pointerdown", () => box.classList.add("open"));
+    document.addEventListener("pointerdown", e => { if (!box.contains(e.target)) box.classList.remove("open"); });
+    box.addEventListener("focusout", e => { if (e.relatedTarget && !box.contains(e.relatedTarget)) box.classList.remove("open"); });
+    box.addEventListener("keydown", e => {
+      if (e.key === "Escape"){ inp.value = slotStr(p, k); box.classList.remove("open"); inp.blur(); }
+    });
+    stage.appendChild(box);
+    p.btn[k] = {plus, minus};
+    p.inp[k] = inp;
+    p.box[k] = box;
+  }
+
+  /* ---------- logic ---------- */
+
+  function cur(p){ return p.draft || {a:p.to.a, b:p.to.b, u:p.unk}; }
+  function slotVal(p, k){ const s = cur(p); return k === "a" ? s.a : k === "b" ? s.b : s.a + p.sign * s.b; }
+  function slotStr(p, k){ return k === cur(p).u ? "x" : String(slotVal(p, k)); }
+
+  // Set slot k to v while unknown u is computed from the other two slots.
+  function solve(p, k, v, u){
+    const S = p.sign;
+    const s0 = cur(p);
+    let a = s0.a, b = s0.b, c = a + S * b;
+    if (v < 0) return {err:"Bitte keine Zahl kleiner als 0."};
+    if (v > MAX) return {err:`Unser Zahlenstrahl geht nur bis ${MAX}.`};
+    if (k === "a") a = v; else if (k === "b") b = v; else c = v;
+    if (u === "c"){
+      c = a + S * b;
+      if (S < 0 && b > a) return {err: k === "a"
+        ? `Der Minuend muss mindestens so groß sein wie der Subtrahend (${b}). Sonst würdest du links an der 0 vorbeispringen.`
+        : `Der Subtrahend darf nicht größer sein als der Minuend (${a}). Sonst würdest du links an der 0 vorbeispringen.`};
+      if (S > 0 && c > MAX) return {err:`Die Summe wäre ${c}. Unser Zahlenstrahl geht aber nur bis ${MAX}.`};
+    } else if (u === "a"){
+      a = c - S * b;
+      if (a > MAX) return {err:`Dann wäre x = ${a}. Unser Zahlenstrahl geht aber nur bis ${MAX}.`};
+      if (a < 0) return {err:`x + ${b} = ${c} hat hier keine Lösung, weil ${b} schon größer ist als ${c}.`};
+    } else {
+      b = S * (c - a);
+      if (b < 0) return {err: S < 0
+        ? `${a} − x = ${c} hat hier keine Lösung: Durch Abziehen kommst du von ${a} nicht auf die größere Zahl ${c}.`
+        : `${a} + x = ${c} hat hier keine Lösung: Durch Addieren kommst du von ${a} nicht auf die kleinere Zahl ${c}.`};
+    }
+    return {a, b};
+  }
+
+  function stepSlot(p, k, d){
+    const u = cur(p).u;
+    if (k === u) return;
+    const r = solve(p, k, slotVal(p, k) + d, u);
+    if (r.err){ showHint(p, r.err, k); return; }
+    setDraft(p, r.a, r.b, u);
+  }
+
+  // Changes in the equation are only a draft until „Rechne“ is pressed.
+  function setDraft(p, a, b, u){
+    p.draft = (a === p.to.a && b === p.to.b && u === p.unk) ? null : {a, b, u};
+    if (p.draft && !p.draftGhost && !p.blank){ p.draftGhost = true; setGhost(p, {a:p.to.a, b:p.to.b}, p.unk, 1e9, true); }
+    else if (!p.draft && p.draftGhost){ p.draftGhost = false; p.ghost = null; p.gGhost.style.opacity = 0; }
+    showHint(p, "");
+    ["a","b","c"].forEach(k => { if (document.activeElement !== p.inp[k]) p.inp[k].value = slotStr(p, k); });
+    syncControls(p);
+    kick();
+  }
+
+  // Nothing drawn yet (start / after „Zurücksetzen“): the first „Rechne“ draws without a grey predecessor.
+  function drawFresh(p, a, b, u, hist){
+    p.blank = false; p.draft = null; p.draftGhost = false;
+    p.ghost = null; p.gGhost.style.opacity = 0;
+    p.to = {a, b}; p.unk = u; p.disp = {a, b}; p.from = {a, b};
+    p.dur = 0; p.step = null;
+    startSeq(p, a, null, null);
+    if (hist) markHist(p);
+    showHint(p, "");
+    ["a","b","c"].forEach(k => { if (document.activeElement !== p.inp[k]) p.inp[k].value = slotStr(p, k); });
+    syncControls(p);
+    kick();
+  }
+
+  function resetBlank(p){
+    p.draft = null; p.draftGhost = false; p.seq = null; p.step = null; p.pendingHist = false;
+    p.ghost = null; p.gGhost.style.opacity = 0;
+    p.to = {a:p.def.a, b:p.def.b}; p.unk = "c";
+    p.disp = {a:p.def.a, b:p.def.b}; p.from = {a:p.def.a, b:p.def.b}; p.dur = 0;
+    p.blank = true;
+    p.histActive = -1;
+    renderHist(p);
+    showHint(p, "");
+    ["a","b","c"].forEach(k => { if (document.activeElement !== p.inp[k]) p.inp[k].value = slotStr(p, k); });
+    syncControls(p);
+    kick();
+  }
+
+  function applyDraft(p){
+    if (p.blank){
+      const d = p.draft || {a:p.to.a, b:p.to.b, u:p.unk};
+      drawFresh(p, d.a, d.b, d.u, true);
+      return;
+    }
+    if (!p.draft) return;
+    const d = p.draft;
+    p.draft = null;
+    p.draftGhost = false;
+    setTarget(p, d.a, d.b, 900, d.u);
+  }
+
+  function onDrag(p, e){
+    const pt = p.svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const x = pt.matrixTransform(p.svg.getScreenCTM().inverse()).x;
+    moveTo(p, p.drag, Math.round((x - X0) / U), 260);
+  }
+
+  function moveTo(p, which, v, dur){
+    let a = p.to.a, b = p.to.b;
+    if (which === "start"){
+      a = p.sign < 0 ? clamp(v, b, MAX) : clamp(v, 0, MAX - b);
+    } else {
+      if (p.sign < 0){ const c = clamp(v, 0, a); b = a - c; }
+      else { const c = clamp(v, a, MAX); b = c - a; }
+    }
+    setTarget(p, a, b, dur);
+  }
+
+  function setTarget(p, a, b, dur, unk){
+    if (p.draft){ p.draft = null; syncControls(p); kick(); }
+    if (p.draftGhost){ p.draftGhost = false; if (p.ghost) p.ghost.hold = performance.now() - p.ghost.t0; }
+    const nu = unk || p.unk;
+    if (a === p.to.a && b === p.to.b && nu === p.unk && !p.step) return;
+    const fromA = p.disp.a, old = p.to, oldUnk = p.unk;
+    p.from = {a:p.disp.a, b:p.disp.b};
+    p.to = {a, b};
+    p.unk = nu;
+    p.t0 = performance.now();
+    p.dur = reduce ? 0 : dur;
+    p.step = null;
+    p.seq = null;
+    if (!p.drag) startSeq(p, fromA, old, oldUnk);
+    if (p.drag && !p.dragGhost){ p.dragGhost = true; setGhost(p, p.dragStart, p.dragUnk, 1e9); }
+    if (!p.drag && !p.restoring && p.hist) markHist(p);
+    showHint(p, "");
+    ["a","b","c"].forEach(k => { if (document.activeElement !== p.inp[k]) p.inp[k].value = slotStr(p, k); });
+    syncControls(p);
+    kick();
+  }
+
+  // Order of drawing depends on which slot is the placeholder x.
+  function startSeq(p, fromA, old, oldUnk){
+    if (reduce || p.svg.classList.contains("noline")){ p.seq = null; p.dur = 0; setGhost(p, old, oldUnk, 1500); kick(); return; }
+    const TB = p.to.b === 0 ? 300 : clamp(350 + 110 * p.to.b, 500, 1800);
+    const lines = !p.svg.classList.contains("nodash");
+    let phases;
+    if (p.unk === "a"){
+      phases = lines ? [["LC",450],["C",500],["R",TB],["A",500],["LA",450],["X",700]]
+                     : [["C",500],["R",TB],["A",500],["X",700]];
+      fromA = p.to.a;
+    } else if (p.unk === "b"){
+      phases = lines ? [["LA",450],["A",500],["LC",450],["C",500],["F",TB]]
+                     : [["A",500],["C",500],["F",TB]];
+    } else {
+      phases = lines ? [["LA",450],["A",500],["F",TB],["C",500],["LC",450],["V",300]]
+                     : [["A",500],["F",TB],["C",500]];
+    }
+    phases = phases.map(([k, d]) => [k, d * 1.7]);
+    p.seq = {t0:performance.now(), fromA, phases, lines};
+    setGhost(p, old, oldUnk, phases.reduce((s, x) => s + x[1], 0) + 700);
+    p.dur = 0;
+    p.step = null;
+    kick();
+  }
+
+  function geom(xs, xe){
+    const dist = Math.abs(xe - xs);
+    if (dist < 3) return {d:"", head:"", lx:xs, ly:Y - 48};
+    const h = Math.min(140, 34 + dist * 0.3);
+    return {
+      d:`M${xs},${Y-10} C${xs},${Y-10-h} ${xe},${Y-10-h} ${xe},${Y-14}`,
+      head:`${xe-8},${Y-28} ${xe+8},${Y-28} ${xe},${Y-11}`,
+      lx:(xs + xe) / 2, ly:Y - 10 - 0.75 * h - 12
+    };
+  }
+
+  function setGhost(p, old, oldUnk, hold, force){
+    if (!old || (!force && old.a === p.to.a && old.b === p.to.b)) return;
+    const xs = X(old.a), xe = X(old.a + p.sign * old.b);
+    const g = geom(xs, xe);
+    p.ghArc.setAttribute("d", g.d);
+    p.ghHead.setAttribute("points", g.head);
+    p.ghLabel.setAttribute("x", g.lx);
+    p.ghLabel.setAttribute("y", g.ly);
+    p.ghLabel.textContent = p.opChar + (oldUnk === "b" ? "x" : old.b);
+    p.ghStart.setAttribute("cx", xs); p.ghStart.setAttribute("cy", Y);
+    p.ghEnd.setAttribute("cx", xe); p.ghEnd.setAttribute("cy", Y);
+    p.ghost = {t0:performance.now(), hold};
+  }
+
+  function startSteps(p){
+    if (p.pendingHist){ p.pendingHist = false; addHist(p); }
+    p.seq = null;
+    p.disp = {a:p.to.a, b:p.to.b};
+    p.dur = 0;
+    p.step = {t0:performance.now(), n:p.to.b, a0:p.to.a, dir:p.sign};
+    kick();
+  }
+
+  function showHint(p, msg, k){
+    p.hint.textContent = msg;
+    ["a","b","c"].forEach(s => p.box[s].classList.toggle("bad", !!msg && s === k));
+  }
+
+  function syncControls(p){
+    const U0 = cur(p).u;
+    ["a","b","c"].forEach(k => {
+      const {plus, minus} = p.btn[k];
+      if (k === U0){ plus.disabled = minus.disabled = true; return; }
+      const v = slotVal(p, k);
+      plus.disabled = !!solve(p, k, v + 1, U0).err;
+      minus.disabled = v <= 0 || !!solve(p, k, v - 1, U0).err;
+    });
+    if (p.bCalc) p.bCalc.disabled = !p.draft && !p.blank;
+    p.hStart.g.setAttribute("aria-valuenow", p.to.a);
+    p.hEnd.g.setAttribute("aria-valuenow", p.to.a + p.sign * p.to.b);
+  }
+
+  /* ---------- history ---------- */
+
+  function markHist(p){
+    if (p.seq) p.pendingHist = true;
+    else { p.pendingHist = false; addHist(p); }
+  }
+
+  function addHist(p){
+    const {a, b} = p.to, u = p.unk;
+    const top = p.hist[0];
+    if (!(top && top.a === a && top.b === b && top.u === u)){
+      p.hist.unshift({a, b, u});
+      if (p.hist.length > 40) p.hist.pop();
+    }
+    p.histActive = 0;
+    renderHist(p);
+  }
+
+  function renderHist(p){
+    p.histList.textContent = "";
+    p.hist.forEach((h, i) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "histitem" + (i === p.histActive ? " active" : "");
+      const c = h.a + p.sign * h.b;
+      const sa = h.u === "a" ? "x" : h.a, sb = h.u === "b" ? "x" : h.b;
+      btn.textContent = `${sa} ${p.opChar} ${sb} = ${c}`;
+      btn.setAttribute("aria-label", `${sa} ${p.sign < 0 ? "minus" : "plus"} ${sb} gleich ${c} wieder anzeigen`);
+      if (i === p.histActive) btn.setAttribute("aria-current", "true");
+      btn.addEventListener("click", () => {
+        if (p.blank){ p.pendingHist = false; drawFresh(p, h.a, h.b, h.u, false); p.histActive = i; renderHist(p); return; }
+        p.pendingHist = false;
+        if (p.draft){ p.draft = null; syncControls(p); }
+        if (p.draftGhost){ p.draftGhost = false; if (p.ghost) p.ghost.hold = performance.now() - p.ghost.t0; }
+        if (h.a === p.to.a && h.b === p.to.b && h.u === p.unk){
+          startSeq(p, p.to.a);
+        } else {
+          p.restoring = true;
+          setTarget(p, h.a, h.b, 900, h.u);
+          p.restoring = false;
+        }
+        p.histActive = i;
+        renderHist(p);
+      });
+      li.appendChild(btn);
+      p.histList.appendChild(li);
+    });
+  }
+
+  /* ---------- drawing ---------- */
+
+  function reveal(path, t){
+    if (t < 1){
+      path.setAttribute("pathLength", 1);
+      path.style.strokeDasharray = "1 1";
+      path.style.strokeDashoffset = 1 - ease(t);
+    } else {
+      path.removeAttribute("pathLength");
+      path.style.strokeDasharray = "";
+      path.style.strokeDashoffset = "";
+    }
+  }
+
+  function render(p, now){
+    p.svg.classList.toggle("drafting", !!p.draft || !!p.blank);
+    let busy = false;
+    const pr = {A:1, F:1, C:1, R:1, X:1, LA:1, LB:1, LC:1, V:1};
+    const L = !!(p.seq && p.seq.lines);
+    const inSeq = !!p.seq;
+    if (p.seq){
+      const s = p.seq, e = now - s.t0;
+      let t = 0;
+      for (const [k, d] of s.phases){ pr[k] = clamp((e - t) / d, 0, 1); t += d; }
+      p.disp.a = s.fromA + (p.to.a - s.fromA) * ease(pr.A);
+      p.disp.b = p.to.b;
+      if (e >= t){
+        p.seq = null;
+        if (p.pendingHist){ p.pendingHist = false; addHist(p); }
+      } else busy = true;
+    } else if (p.dur > 0 && now - p.t0 < p.dur){
+      const t = ease((now - p.t0) / p.dur);
+      p.disp.a = p.from.a + (p.to.a - p.from.a) * t;
+      p.disp.b = p.from.b + (p.to.b - p.from.b) * t;
+      busy = true;
+    } else {
+      p.disp.a = p.to.a; p.disp.b = p.to.b;
+    }
+
+    const u = p.unk, S = p.sign;
+    const a = p.disp.a, b = p.disp.b;
+    const c = inSeq ? p.to.a + S * p.to.b : a + S * b;
+    const xs = X(a), xe = X(c);
+    const ra = Math.round(a), rb = Math.round(b), rc = inSeq ? c : ra + S * rb;
+    const pX = u === "c" ? 1 : pr.X;
+
+    // equation
+    const D = p.draft;
+    const show = D ? {a: D.u === "a" ? "x" : D.a, b: D.u === "b" ? "x" : D.b, c: D.a + S * D.b}
+                   : {a: u === "a" ? "x" : ra, b: u === "b" ? "x" : rb, c: rc};
+    const ue = D ? D.u : u;
+    ["a","b","c"].forEach(k => { if (document.activeElement !== p.inp[k]) p.inp[k].value = show[k]; });
+    p.box.c.style.display = ue === "c" ? "none" : "";
+    p.tC.style.display = ue === "c" ? "" : "none";
+    p.tC.textContent = (!D && !p.blank && pr.C > 0 && pr.V > 0) ? rc : "?";
+    p.tX.style.opacity = 0;
+
+    // arrows
+    const dist = Math.abs(xe - xs);
+    let lx, ly;
+    if (dist < 3){
+      p.arc.setAttribute("d", ""); p.rarc.setAttribute("d", "");
+      p.head.setAttribute("points", ""); p.rhead.setAttribute("points", "");
+      lx = xs; ly = Y - 48;
+    } else {
+      const h = Math.min(140, 34 + dist * 0.3);
+      p.arc.setAttribute("d", `M${xs},${Y-10} C${xs},${Y-10-h} ${xe},${Y-10-h} ${xe},${Y-14}`);
+      p.head.setAttribute("points", `${xe-8},${Y-28} ${xe+8},${Y-28} ${xe},${Y-11}`);
+      p.rarc.setAttribute("d", `M${xe},${Y-10} C${xe},${Y-10-h} ${xs},${Y-10-h} ${xs},${Y-14}`);
+      p.rhead.setAttribute("points", `${xs-8},${Y-28} ${xs+8},${Y-28} ${xs},${Y-11}`);
+      lx = (xs + xe) / 2; ly = Y - 10 - 0.75 * h - 12;
+    }
+    p.arcLabel.setAttribute("x", lx); p.arcLabel.setAttribute("y", ly);
+    p.rlabel.setAttribute("x", lx); p.rlabel.setAttribute("y", ly);
+    p.arcLabel.textContent = p.opChar + (u === "b" ? "x" : rb);
+    p.rlabel.textContent = p.invChar + rb;
+
+    let fT, fO, rT, rO, bO;
+    if (u === "a"){ fT = 1; fO = pr.X; rT = pr.R; rO = pr.R > 0 ? 1 - pr.X : 0; bO = pr.R; }
+    else { fT = pr.F; fO = 1; rT = 0; rO = 0; bO = pr.F; }
+    reveal(p.arc, fT);
+    p.arc.style.opacity = fO;
+    p.head.style.opacity = fO * clamp((fT - .85) / .15, 0, 1);
+    p.arcLabel.style.opacity = fO * fT;
+    reveal(p.rarc, rT);
+    p.rarc.style.opacity = rO;
+    p.rhead.style.opacity = rO * clamp((rT - .85) / .15, 0, 1);
+    p.rlabel.style.opacity = rO * rT;
+
+    // dashed connectors: given numbers are drawn down to the line, the result is drawn back up
+    const tops = {A:[300, 134], B:[430, 134], C:[562, u === "c" ? 123 : 134]};
+    const bots = {A:[xs, Y - 20], B:[lx, ly - 26], C:[xe, Y - 32]};
+    const unkKey = {a:"A", b:"B", c:"C"}[u];
+    const conn = (key, l, dt, g, plainOp) => {
+      const [x1, y1] = tops[key], [x2, y2] = bots[key];
+      const t = L ? ease(pr["L" + key]) : 1;
+      const up = key === unkKey;
+      if (up) line(l, x2, y2, x2 + (x1 - x2) * t, y2 + (y1 - y2) * t);
+      else line(l, x1, y1, x1 + (x2 - x1) * t, y1 + (y2 - y1) * t);
+      dot(dt, x2, y2);
+      dt.setAttribute("opacity", (up || t >= 1) ? 1 : 0);
+      g.style.opacity = L ? (pr["L" + key] > 0 ? 1 : 0) : plainOp;
+    };
+    conn("A", p.dA, p.dotA, p.gLA, pr.A);
+    conn("C", p.dC, p.dotC, p.gLC, pr.C);
+
+    // points
+    const sS = u === "a" ? scaleIn(pr.A) : 1 + .45 * Math.sin(Math.PI * pr.A);
+    p.hStart.g.setAttribute("transform", `translate(${xs},${Y}) scale(${sS})`);
+    p.hEnd.g.setAttribute("transform", `translate(${xe},${Y}) scale(${scaleIn(pr.C)})`);
+
+    // tick labels
+    const showA = pr.A > 0 && u !== "a", showC = pr.C > 0;
+    p.ticks.forEach((t, v) => {
+      const isA = showA && v === ra, isC = showC && v === rc;
+      t.classList.toggle("hi", isA || isC);
+      t.classList.toggle("hia", isA && !isC);
+      t.classList.toggle("hic", isC);
+    });
+    if (u === "a"){ p.xMark.setAttribute("x", xs); p.xMark.style.opacity = pr.A; }
+    else p.xMark.style.opacity = 0;
+
+    // step-by-step hops
+    p.gHops.textContent = "";
+    if (p.step){
+      const s = p.step;
+      const T = reduce ? s.n : (now - s.t0) / 650;
+      p.gArc.style.opacity = .2;
+      p.gRev.style.opacity = .2;
+      for (let i = 0; i < s.n && i < T; i++){
+        const f = Math.min(1, T - i);
+        const x1 = X(s.a0 + s.dir * i), x2 = X(s.a0 + s.dir * (i + 1));
+        el("path", {d:`M${x1},${Y-6} Q${(x1+x2)/2},${Y-62} ${x2},${Y-6}`,
+          class:"hop sb", pathLength:1, "stroke-dasharray":"1 1", "stroke-dashoffset":1 - f}, p.gHops);
+        const lab = el("text", {x:(x1+x2)/2, y:Y-40, "text-anchor":"middle", class:"hoplabel fb", opacity:f}, p.gHops);
+        lab.textContent = i + 1;
+      }
+      if (T < s.n) busy = true;
+    } else {
+      p.gArc.style.opacity = 1;
+      p.gRev.style.opacity = 1;
+    }
+    if (p.ghost){
+      const e = now - p.ghost.t0, FADE = reduce ? 1 : 1400;
+      let o = .55;
+      if (!p.keepGhost && e > p.ghost.hold) o = .55 * (1 - (e - p.ghost.hold) / FADE);
+      if (o <= 0){ p.ghost = null; o = 0; } else if (!p.keepGhost) busy = true;
+      p.gGhost.style.opacity = o;
+    }
+    return busy;
+  }
+
+  function line(l, x1, y1, x2, y2){
+    l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+    l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+  }
+  function dot(c, x, y){ c.setAttribute("cx", x); c.setAttribute("cy", y); }
+
+  function kick(){ if (!running){ running = true; requestAnimationFrame(tick); } }
+  function tick(now){
+    let any = false;
+    panels.forEach(p => { if (render(p, now)) any = true; });
+    if (any) requestAnimationFrame(tick); else running = false;
+  }
+})();
+</script>
+</body>
+</html>

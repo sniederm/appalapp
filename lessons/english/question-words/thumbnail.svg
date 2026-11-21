@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#fff8ef"/>
+  <g font-family="Nunito,system-ui,sans-serif" font-weight="900" text-anchor="middle">
+    <g fill="#fff" stroke-width="6">
+      <rect x="60"  y="80"  width="230" height="76" rx="22" stroke="#2457c5"/>
+      <rect x="350" y="80"  width="230" height="76" rx="22" stroke="#d9dcea"/>
+      <rect x="60"  y="180" width="230" height="76" rx="22" stroke="#d9dcea"/>
+      <rect x="350" y="180" width="230" height="76" rx="22" stroke="#2f9e5b" fill="#e8f7ee"/>
+      <rect x="60"  y="280" width="230" height="76" rx="22" stroke="#2f9e5b" fill="#e8f7ee"/>
+      <rect x="350" y="280" width="230" height="76" rx="22" stroke="#d9dcea"/>
+    </g>
+    <g font-size="34" fill="#1d2340">
+      <text x="175" y="130">Where …?</text>
+      <text x="465" y="130">Wer …?</text>
+      <text x="175" y="230">Who …?</text>
+      <text x="465" y="230" fill="#1f6b3e">Was …?</text>
+      <text x="175" y="330" fill="#1f6b3e">What …?</text>
+      <text x="465" y="330">Wie alt …?</text>
+    </g>
+    <circle cx="320" cy="48" r="26" fill="#ffc533"/>
+    <text x="320" y="60" font-size="36" fill="#1d2340">?</text>
+  </g>
+</svg>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appalapp – Lernapps</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1d2340;--muted:#5b6180;--bg:#fff8ef;--line:#d9dcea;--blue:#2457c5;--yellow:#ffc533;--red:#e2412b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+  header{text-align:center;padding:16px 0 20px}
+  .brand{display:flex;align-items:center;justify-content:center;gap:clamp(10px,2.5vw,20px)}
+  h1{font-size:clamp(38px,8vw,64px);margin:0;font-weight:900;line-height:1.05;letter-spacing:.01em}
+  .logo{flex:none;width:clamp(56px,11vw,84px);height:auto;animation:wob 4s ease-in-out infinite;transform-origin:50% 90%}
+  @keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  @media (prefers-reduced-motion:reduce){.logo{animation:none}}
+  header p{margin:6px 0 0;font-size:clamp(16px,2.3vw,20px);color:var(--muted);font-weight:700}
+
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 22px}
+  .search{flex:1 1 220px;min-height:48px;border:3px solid var(--line);border-radius:14px;padding:0 14px;font:inherit;font-weight:700;background:#fff;color:var(--ink)}
+  .search:focus{outline:none;border-color:var(--blue)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{min-height:48px;border:3px solid var(--line);background:#fff;border-radius:999px;padding:0 16px;font:inherit;font-weight:800;color:var(--ink);cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px}
+  .app{display:flex;flex-direction:column;background:#fff;border:3px solid var(--line);border-radius:20px;overflow:hidden;
+    text-decoration:none;color:inherit;box-shadow:0 5px 0 var(--line);transition:transform .12s,box-shadow .12s,border-color .12s}
+  .app:hover,.app:focus-visible{transform:translateY(-3px);border-color:var(--blue);box-shadow:0 8px 0 var(--blue);outline:none}
+  .app:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue)}
+  .thumb{aspect-ratio:16/10;background:#eef3ff;display:grid;place-items:center;font-size:56px;border-bottom:3px solid var(--line)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .meta{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px;background:var(--yellow);color:var(--ink)}
+  .pill.lvl{background:#eef3ff;color:var(--blue)}
+  .app h2{margin:0;font-size:22px;font-weight:900}
+  .app p{margin:0;font-weight:700;color:var(--muted);font-size:15.5px;line-height:1.4;flex:1}
+  .tags{font-size:13px;font-weight:700;color:var(--muted)}
+  .go{font-weight:900;color:var(--blue)}
+  .empty{text-align:center;color:var(--muted);font-weight:800;padding:40px 0}
+  footer{text-align:center;margin-top:40px;color:var(--muted);font-weight:700;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+    <img class="logo" src="logo.svg" alt="">
+    <h1 aria-label="Appalapp"><span style="color:#2457c5">App</span><span style="color:#e2412b">al</span><span style="color:#2457c5">app</span></h1>
+    </div>
+    <p>Lernen mit Spaß – such dir eine App aus und leg los!</p>
+  </header>
+
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="Suchen …" aria-label="Apps durchsuchen">
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <main class="grid" id="grid"></main>
+  <div class="empty" id="empty" hidden>Nichts gefunden 🤷</div>
+  <footer id="count"></footer>
+</div>
+
+<script src="apps.js"></script>
+<script>
+const EMOJI = {Englisch:'🇬🇧', Mathe:'➗', Deutsch:'📖'};
+const apps = window.APPS || [];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let subject = 'Alle';
+
+const subjects = ['Alle', ...new Set(apps.map(a => a.subject))];
+$('chips').innerHTML = subjects.map(s =>
+  `<button class="chip" data-s="${esc(s)}" aria-pressed="${s === subject}">${esc(s)}</button>`).join('');
+
+function render() {
+  const q = $('q').value.trim().toLowerCase();
+  const list = apps.filter(a =>
+    (subject === 'Alle' || a.subject === subject) &&
+    (!q || [a.title, a.description, a.subject, a.level, ...a.tags].join(' ').toLowerCase().includes(q)));
+  $('grid').innerHTML = list.map(a => `
+    <a class="app" href="${esc(a.path)}index.html" target="_blank" rel="noopener">
+      <div class="thumb">${a.thumbnail
+        ? `<img src="${esc(a.thumbnail)}" alt="" loading="lazy">`
+        : `<span aria-hidden="true">${EMOJI[a.subject] || '🎓'}</span>`}</div>
+      <div class="body">
+        <div class="meta"><span class="pill">${esc(a.subject)}</span>${a.level ? `<span class="pill lvl">${esc(a.level)}</span>` : ''}</div>
+        <h2>${esc(a.title)}</h2>
+        <p>${esc(a.description)}</p>
+        <div class="tags">${a.tags.map(t => '#' + esc(t)).join(' ')}</div>
+        <div class="go">Öffnen →</div>
+      </div>
+    </a>`).join('');
+  $('empty').hidden = list.length > 0;
+  $('count').textContent = `${apps.length} ${apps.length === 1 ? 'App' : 'Apps'}`;
+}
+
+$('q').addEventListener('input', render);
+$('chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  subject = b.dataset.s;
+  document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b));
+  render();
+});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <title>Appalapp</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6df0"/><stop offset="1" stop-color="#5a3fd0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="10" width="112" height="106" rx="30" fill="#1d2340" opacity=".18"/>
+  <rect x="4" y="4" width="112" height="106" rx="30" fill="url(#g)"/>
+  <!-- A mit Lächeln als Querbalken -->
+  <path d="M30 98 L60 36 L90 98" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M45 76 Q60 92 75 76" fill="none" stroke="#ffc533" stroke-width="8" stroke-linecap="round"/>
+  <!-- Doktorhut -->
+  <path d="M60 10 L92 22 L60 34 L28 22Z" fill="#e2412b"/>
+  <path d="M43 28 v8 q17 8 34 0 v-8 L60 34Z" fill="#b8321f"/>
+  <path d="M92 22 v14" stroke="#ffc533" stroke-width="3" stroke-linecap="round"/><circle cx="92" cy="39" r="3.5" fill="#ffc533"/>
+</svg>

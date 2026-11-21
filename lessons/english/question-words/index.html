@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Words – Zuordnungsspiel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1d2340; --muted:#5b6180; --bg:#fff8ef; --line:#d9dcea;
+    --red:#e2412b; --blue:#2457c5; --green:#2f9e5b; --yellow:#ffc533;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,-apple-system,sans-serif;
+    -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
+  button{font-family:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+  .wrap{max-width:1000px;margin:0 auto;padding:16px 16px 130px}
+
+  /* Top bar */
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .top h2{flex:1;margin:0;font-size:clamp(18px,2.6vw,26px);font-weight:900}
+  .icon{border:2px solid var(--line);background:#fff;border-radius:12px;min-width:48px;height:48px;font-size:22px;padding:0 10px;font-weight:800}
+  .icon.small{font-size:16px}
+  .progress{display:flex;gap:6px;align-items:center;margin:0 0 6px}
+  .dot{width:14px;height:14px;border-radius:50%;background:var(--line)}
+  .dot.on{background:var(--yellow)} .dot.cur{background:var(--blue)}
+  .task{font-size:clamp(16px,2.2vw,20px);font-weight:700;color:var(--muted);margin:4px 0 14px}
+  .task b{color:var(--ink)}
+
+  /* Grid */
+  .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px 22px}
+  .grid.even{grid-template-columns:1fr 1fr}
+  .col{display:flex;flex-direction:column;gap:12px}
+  .colhead{font-size:14px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:-2px}
+  .card{min-height:76px;border:3px solid var(--line);border-radius:18px;background:#fff;
+    font-size:clamp(17px,2.4vw,24px);font-weight:800;padding:12px 16px;text-align:left;
+    box-shadow:0 4px 0 var(--line);transition:transform .12s, background .2s, border-color .2s, opacity .3s}
+  .R .card{text-align:center}
+  .card:active{transform:translateY(2px)}
+  .card.sel{border-color:var(--blue);box-shadow:0 4px 0 var(--blue);background:#eef3ff;transform:translateY(-3px)}
+  .card.ok{border-color:var(--green);background:#e8f7ee;box-shadow:none;color:#1f6b3e;opacity:.7;transform:none;cursor:default}
+  .card.bad{animation:shake .45s;border-color:var(--red);background:#fdecea}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+  .card.ok{animation:pop .35s}
+  .gap{display:inline-block;min-width:3.2em;border-bottom:3px dashed var(--red);height:1em;vertical-align:-2px}
+  .filled{color:var(--blue)}
+  .ans{display:block;font-size:.78em;font-weight:600;color:var(--muted);margin-top:4px}
+  .ok .ans{color:#1f6b3e}
+
+  /* Feedback bar */
+  .fb{position:fixed;left:0;right:0;bottom:0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+    background:var(--ink);color:#fff;font-size:clamp(16px,2.2vw,20px);font-weight:700;text-align:center;min-height:64px;
+    transition:background .25s}
+  .fb.good{background:var(--green)} .fb.badfb{background:var(--red)}
+
+  /* Menu */
+  .hero{text-align:center;padding:18px 0 8px}
+  .hero .badge{display:inline-block;background:var(--red);color:#fff;font-weight:900;border-radius:999px;padding:6px 14px;font-size:15px;letter-spacing:.05em}
+  .hero h1{font-size:clamp(34px,6vw,58px);margin:12px 0 4px;font-weight:900;line-height:1.05}
+  .hero h1 span{color:var(--blue)}
+  .hero p{margin:6px 0 0;font-size:clamp(16px,2.3vw,20px);color:var(--muted);font-weight:700}
+  .levels{display:grid;gap:14px;margin:26px 0 18px}
+  .lvl{display:flex;align-items:center;gap:16px;border:3px solid var(--line);border-radius:20px;background:#fff;padding:16px 18px;text-align:left;box-shadow:0 5px 0 var(--line)}
+  .lvl:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+  .lvl .num{flex:none;width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:28px;font-weight:900;color:#fff}
+  .lvl .txt{flex:1}
+  .lvl .t1{font-size:clamp(19px,2.6vw,24px);font-weight:900}
+  .lvl .t2{font-size:clamp(14px,2vw,17px);font-weight:700;color:var(--muted);margin-top:2px}
+  .stars{font-size:26px;letter-spacing:2px;white-space:nowrap}
+  .star-off{opacity:.18;filter:grayscale(1)}
+  .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{border:none;border-radius:16px;padding:16px 24px;font-size:19px;font-weight:900;color:#fff;background:var(--blue);box-shadow:0 4px 0 #173a86;min-height:56px}
+  .btn.alt{background:#fff;color:var(--ink);border:3px solid var(--line);box-shadow:0 4px 0 var(--line)}
+  .btn.red{background:var(--red);box-shadow:0 4px 0 #a52c1b}
+  .btn:active{transform:translateY(3px);box-shadow:none}
+
+  /* End screen */
+  .end{text-align:center;padding:30px 10px}
+  .end .big{font-size:72px;letter-spacing:6px;margin:10px 0}
+  .end h2{font-size:clamp(28px,5vw,44px);margin:6px 0;font-weight:900}
+  .end p{font-size:clamp(17px,2.4vw,21px);font-weight:700;color:var(--muted);margin:8px 0 24px}
+
+  /* Cheat sheet modal */
+  .modal{position:fixed;inset:0;background:rgba(29,35,64,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .sheet{background:#fff;border-radius:22px;max-width:640px;width:100%;max-height:90vh;overflow:auto;padding:22px 22px 26px;-webkit-user-select:text;user-select:text}
+  .sheet h3{margin:0 0 4px;font-size:24px;font-weight:900}
+  .sheet .sub{color:var(--muted);font-weight:700;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;font-size:17px;margin-bottom:14px}
+  th{background:#8dbb3c;color:#fff;text-align:left;padding:8px 10px;font-weight:900}
+  td{padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700}
+  td:first-child b{color:var(--blue)}
+  .warn{background:#fff3cd;border:2px solid var(--yellow);border-radius:14px;padding:12px 14px;font-weight:800;margin-bottom:12px}
+  .tip{background:#eef3ff;border:2px solid #c9d6f5;border-radius:14px;padding:12px 14px;font-weight:700;margin-bottom:16px}
+
+  @media (max-width:560px){
+    .grid,.grid.even{grid-template-columns:1fr 1fr;gap:10px 10px}
+    .card{padding:10px 10px;min-height:64px;border-radius:14px}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal"></div>
+
+<script>
+/* ---------- Daten ---------- */
+const CATS = ['where','from','who','what','howold'];
+const CHIP = {where:'Where', from:'Where … from', who:'Who', what:'What', howold:'How old'};
+const HINT = {
+  where: 'Tipp: Hier wird nach dem <b>Ort</b> gefragt (Wo?) → <b>Where</b>',
+  from:  'Tipp: <b>Woher?</b> → <b>Where … from?</b> – das <b>from</b> steht am Ende!',
+  who:   'Tipp: Nach einer <b>Person</b> (Wer?) fragst du mit <b>Who</b>.',
+  what:  'Tipp: Nach einer <b>Sache</b> (Was?) fragst du mit <b>What</b>.',
+  howold:'Tipp: Nach dem <b>Alter</b> (Wie alt?) fragst du mit <b>How old</b>.',
+  short: 'Tipp: Nach dem Fragewort wird <b>is</b> oft zu <b>’s</b> verkürzt.'
+};
+const TRAP = '⚠️ Vorsicht Falle! <b>Who = Wer</b> und <b>Where = Wo</b> – auch wenn es anders klingt!';
+
+// Level 1 – feste Runden
+const L1 = [
+  { task:'Tippe ein englisches Fragewort an und dann die <b>deutsche Bedeutung</b>.', heads:['Englisch','Deutsch'], items:[
+    {cat:'where', l:'Where …?', r:'Wo …?', say:'Where'},
+    {cat:'from',  l:'Where … from?', r:'Woher …?', say:'Where from'},
+    {cat:'who',   l:'Who …?', r:'Wer …?', say:'Who'},
+    {cat:'what',  l:'What …?', r:'Was …?', say:'What'},
+    {cat:'howold',l:'How old …?', r:'Wie alt …?', say:'How old'},
+  ]},
+  { task:'Finde die passende <b>Kurzform</b>.', heads:['Langform','Kurzform'], items:[
+    {cat:'short', l:'Where is …?', r:'Where’s …?', say:'Where’s'},
+    {cat:'short', l:'Who is …?',   r:'Who’s …?',   say:'Who’s'},
+    {cat:'short', l:'What is …?',  r:'What’s …?',  say:'What’s'},
+    {cat:'short', l:'How is …?',   r:'How’s …?',   say:'How’s'},
+  ]},
+  { task:'Welche englische Frage passt zur <b>deutschen Frage</b>?', heads:['Deutsch','Englisch'], items:[
+    {cat:'who',   l:'Wer ist das?', r:'Who’s that?', say:'Who’s that?'},
+    {cat:'where', l:'Wo ist der Brandmelder?', r:'Where’s the smoke detector?', say:'Where’s the smoke detector?'},
+    {cat:'what',  l:'Was ist das?', r:'What’s this?', say:'What’s this?'},
+    {cat:'from',  l:'Woher kommst du?', r:'Where are you from?', say:'Where are you from?'},
+    {cat:'howold',l:'Wie alt ist dein Bulldog?', r:'How old is your Bulldog?', say:'How old is your Bulldog?'},
+  ]},
+];
+
+// Level 2 – Frage ↔ Antwort
+const L2 = {
+  where:[
+    ['Where’s the fire engine?','It’s in the fire station.'],
+    ['Where are the firefighters?','They’re on the ladder.'],
+    ['Where’s your Bulldog?','It’s in the garage.'],
+    ['Where are the batteries?','They’re under the table.'],
+  ],
+  from:[
+    ['Where’s Michael Jackson from?','He’s from Gary, in the USA.'],
+    ['Where are you from?','I’m from Bavaria.'],
+    ['Where’s the doctor from?','She’s from London.'],
+    ['Where are the policemen from?','They’re from Munich.'],
+  ],
+  who:[
+    ['Who’s the King of Pop?','Michael Jackson is the King of Pop.'],
+    ['Who’s that man?','He’s a policeman.'],
+    ['Who’s your hero?','My hero is a firefighter.'],
+    ['Who’s at the door?','It’s the doctor.'],
+  ],
+  what:[
+    ['What’s this?','It’s a smoke detector.'],
+    ['What’s in your room?','There’s a fire alarm in my room.'],
+    ['What’s your favourite colour?','Red – like a fire engine!'],
+    ['What’s that?','It’s an old tractor.'],
+  ],
+  howold:[
+    ['How old is your Bulldog?','It’s sixty years old.'],
+    ['How old are you?','I’m eleven.'],
+    ['How old is the fire engine?','It’s twenty years old.'],
+    ['How old are your cousins?','They’re eight and ten.'],
+  ],
+};
+
+// Level 3 – Lücke ↔ Fragewort  ({W} = Fragewort, {F} = from)
+const L3 = {
+  where:[
+    ['{W} is the fire station?','It’s next to the park.'],
+    ['{W} are my screwdrivers?','They’re in the toolbox.'],
+    ['{W}’s the ambulance?','It’s in front of the hospital.'],
+  ],
+  from:[
+    ['{W} is your friend {F}?','He’s from Berlin.'],
+    ['{W} are the firefighters {F}?','They’re from Nuremberg.'],
+    ['{W} is Dr Brown {F}?','She’s from Scotland.'],
+  ],
+  who:[
+    ['{W} is that woman?','She’s a doctor.'],
+    ['{W}’s on stage?','Michael Jackson!'],
+    ['{W} is your teacher?','Mrs Huber.'],
+  ],
+  what:[
+    ['{W} is in the box?','A battery, a wire and a lamp.'],
+    ['{W}’s that?','It’s a police car.'],
+    ['{W} is your favourite song?','“Thriller”!'],
+  ],
+  howold:[
+    ['{W} is your grandpa?','He’s seventy.'],
+    ['{W} is the old tractor?','It’s sixty years old.'],
+    ['{W} are the twins?','They’re nine.'],
+  ],
+};
+
+const LEVELS = [
+  {n:1, color:'var(--blue)',  t1:'Was heißt das?',          t2:'Fragewörter, Kurzformen & Übersetzen'},
+  {n:2, color:'var(--red)',   t1:'Frage trifft Antwort',    t2:'Welche Antwort passt zur Frage?'},
+  {n:3, color:'var(--green)', t1:'Welches Fragewort fehlt?',t2:'Setze das richtige Fragewort in die Lücke'},
+];
+
+const PRAISE = ['Super!','Genau!','Stark!','Richtig!','Volltreffer!','Spitze!','Yes! 👍','Klasse!','Sauber!'];
+
+/* ---------- Hilfsfunktionen ---------- */
+const app = document.getElementById('app');
+const modal = document.getElementById('modal');
+let sound = true;
+let S = null;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function getBest(){try{return JSON.parse(localStorage.getItem('qw_best')||'{}');}catch(e){return {};}}
+function setBest(l,s){try{const b=getBest(); if(!b[l]||s>b[l]){b[l]=s; localStorage.setItem('qw_best',JSON.stringify(b));}}catch(e){}}
+function starsHTML(n){let h='';for(let i=1;i<=3;i++)h+= i<=n?'⭐':'<span class="star-off">⭐</span>';return h;}
+
+function speak(t){
+  if(!sound) return;
+  try{const s=window.speechSynthesis; if(!s) return; s.cancel();
+    const u=new SpeechSynthesisUtterance(t.replace(/…/g,'')); u.lang='en-GB'; u.rate=0.9; s.speak(u);}catch(e){}
+}
+
+function wordFor(c){ return c==='from' ? 'Where' : CHIP[c]; }
+
+/* ---------- Runden bauen ---------- */
+function buildRounds(level){
+  if(level===1) return L1.map(r=>({task:r.task, heads:r.heads, even:true, items:r.items.map(x=>({...x, lHTML:x.l, rHTML:x.r, lDone:x.l}))}));
+  const pool = level===2 ? L2 : L3;
+  const sh = {}; CATS.forEach(c=>sh[c]=shuffle(pool[c]));
+  const rounds=[];
+  for(let r=0;r<3;r++){
+    const items = CATS.map(c=>{
+      const [q,a] = sh[c][r];
+      if(level===2) return {cat:c, lHTML:q, rHTML:a, lDone:q, say:q+' … '+a};
+      const W = wordFor(c);
+      const gapQ = q.replace('{W}','<span class="gap"></span>').replace('{F}','<span class="gap"></span>');
+      const fillQ = q.replace('{W}','<span class="filled">'+W+'</span>').replace('{F}','<span class="filled">from</span>');
+      const plain = q.replace('{W}',W).replace('{F}','from');
+      return {cat:c, lHTML:gapQ+'<span class="ans">– '+a+'</span>', lDone:fillQ+'<span class="ans">– '+a+'</span>', rHTML:CHIP[c], say:plain+' … '+a};
+    });
+    rounds.push({
+      task: level===2 ? 'Tippe eine <b>Frage</b> an und dann die passende <b>Antwort</b>.'
+                      : 'Lies die Antwort und finde das <b>Fragewort</b>, das in die Lücke passt.',
+      heads: level===2 ? ['Frage','Antwort'] : ['Frage mit Lücke','Fragewort'],
+      even: level===2, items: shuffle(items)
+    });
+  }
+  return rounds;
+}
+
+/* ---------- Screens ---------- */
+function menu(){
+  S=null; closeModal();
+  const best=getBest();
+  app.innerHTML = `
+  <div class="wrap">
+    <div class="hero">
+      <h1>Question <span>Words</span></h1>
+      <p>Fragen mit Fragewörtern – Where? Who? What? How old?</p>
+    </div>
+    <div class="levels">
+      ${LEVELS.map(L=>`
+        <button class="lvl" onclick="startLevel(${L.n})">
+          <div class="num" style="background:${L.color}">${L.n}</div>
+          <div class="txt"><div class="t1">${L.t1}</div><div class="t2">${L.t2}</div></div>
+          <div class="stars">${starsHTML(best[L.n]||0)}</div>
+        </button>`).join('')}
+    </div>
+    <div class="row">
+      <button class="btn alt" onclick="cheat()">📖 Spickzettel</button>
+      <button class="btn alt" onclick="toggleSound(this)">${sound?'🔊 Ton an':'🔇 Ton aus'}</button>
+    </div>
+  </div>`;
+}
+
+function startLevel(n){
+  S = {level:n, rounds:buildRounds(n), r:0, errors:0};
+  startRound();
+}
+
+function startRound(){
+  const R = S.rounds[S.r];
+  S.sel=null; S.done=new Set(); S.busy=false;
+  const order = shuffle(R.items.map((_,i)=>i));
+  const L = LEVELS[S.level-1];
+  app.innerHTML = `
+  <div class="wrap">
+    <div class="top">
+      <button class="icon" onclick="menu()" aria-label="Menü">🏠</button>
+      <h2>Level ${S.level}: ${L.t1}</h2>
+      <button class="icon" onclick="cheat()" aria-label="Spickzettel">📖</button>
+      <button class="icon" onclick="toggleSound(this,true)" aria-label="Ton">${sound?'🔊':'🔇'}</button>
+    </div>
+    <div class="progress">${S.rounds.map((_,i)=>`<div class="dot ${i<S.r?'on':(i===S.r?'cur':'')}"></div>`).join('')}
+      <span style="margin-left:8px;font-weight:800;color:var(--muted)">Runde ${S.r+1} von ${S.rounds.length}</span></div>
+    <div class="task">${R.task}</div>
+    <div class="grid ${R.even?'even':''}">
+      <div class="col L"><div class="colhead">${R.heads[0]}</div>
+        ${R.items.map((it,i)=>`<button class="card" data-side="L" data-i="${i}">${it.lHTML}</button>`).join('')}
+      </div>
+      <div class="col R"><div class="colhead">${R.heads[1]}</div>
+        ${order.map(i=>`<button class="card" data-side="R" data-i="${i}">${R.items[i].rHTML}</button>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="fb" id="fb">Los geht’s! Tippe links eine Karte an. 👇</div>`;
+  app.querySelectorAll('.card').forEach(b=>b.addEventListener('click',()=>tap(b.dataset.side,+b.dataset.i)));
+}
+
+function card(side,i){return app.querySelector(`.card[data-side="${side}"][data-i="${i}"]`);}
+function fb(html,cls){const f=document.getElementById('fb'); f.innerHTML=html; f.className='fb '+(cls||'');}
+
+function tap(side,i){
+  if(S.busy || S.done.has(i)) return;
+  if(!S.sel || S.sel.side===side){
+    const same = S.sel && S.sel.side===side && S.sel.i===i;
+    if(S.sel) card(S.sel.side,S.sel.i).classList.remove('sel');
+    if(same){S.sel=null; return;}
+    S.sel={side,i}; card(side,i).classList.add('sel');
+    return;
+  }
+  const li = side==='L'?i:S.sel.i, ri = side==='R'?i:S.sel.i;
+  const a=card('L',li), b=card('R',ri);
+  a.classList.remove('sel'); b.classList.remove('sel'); S.sel=null;
+  const items=S.rounds[S.r].items;
+  if(li===ri){
+    S.done.add(li);
+    a.classList.add('ok'); b.classList.add('ok');
+    a.innerHTML = items[li].lDone;
+    fb(pick(PRAISE),'good');
+    speak(items[li].say);
+    if(S.done.size===items.length){
+      S.busy=true;
+      setTimeout(()=>{ if(!S) return; S.r++; if(S.r<S.rounds.length) startRound(); else endLevel(); }, 1600);
+    }
+  } else {
+    S.errors++;
+    a.classList.add('bad'); b.classList.add('bad');
+    setTimeout(()=>{a.classList.remove('bad'); b.classList.remove('bad');},500);
+    const c1=items[li].cat, c2=items[ri].cat;
+    const trap = (c1==='who'&&(c2==='where'||c2==='from')) || (c2==='who'&&(c1==='where'||c1==='from'));
+    fb(trap ? TRAP : '❌ Passt nicht. '+(HINT[c1]||''),'badfb');
+  }
+}
+
+function endLevel(){
+  const e=S.errors, n = e<=1?3:(e<=4?2:1);
+  setBest(S.level,n);
+  const msg = n===3 ? ['Perfekt!','Du bist ein Fragewort-Profi! 🚒'] :
+              n===2 ? ['Richtig gut!','Fast fehlerfrei – noch eine Runde, dann hast du 3 Sterne!'] :
+                      ['Geschafft!','Jeder Fehler ist ein Lern-Treffer. Probier’s gleich nochmal – es wird jedes Mal leichter!'];
+  const next = S.level<3 ? `<button class="btn red" onclick="startLevel(${S.level+1})">Nächstes Level ➜</button>` : '';
+  app.innerHTML = `
+  <div class="wrap"><div class="end">
+    <div class="big">${starsHTML(n)}</div>
+    <h2>${msg[0]}</h2>
+    <p>${msg[1]}<br>Fehlversuche: <b>${e}</b></p>
+    <div class="row">
+      <button class="btn" onclick="startLevel(${S.level})">🔁 Nochmal</button>
+      ${next}
+      <button class="btn alt" onclick="menu()">🏠 Menü</button>
+    </div>
+  </div></div>`;
+}
+
+function toggleSound(btn,iconOnly){
+  sound=!sound;
+  btn.textContent = iconOnly ? (sound?'🔊':'🔇') : (sound?'🔊 Ton an':'🔇 Ton aus');
+  if(!sound){try{speechSynthesis.cancel();}catch(e){}}
+}
+
+function cheat(){
+  modal.innerHTML = `
+  <div class="modal" onclick="if(event.target===this)closeModal()">
+    <div class="sheet">
+      <h3>📖 Spickzettel</h3>
+      <div class="sub">Fragen mit Fragewörtern – Questions with question words</div>
+      <table>
+        <tr><th>Frage</th><th>Antwort</th><th>Wonach?</th></tr>
+        <tr><td><b>Where</b> are you?</td><td>I’m in the garage.</td><td>Wo …?</td></tr>
+        <tr><td><b>Where</b> are you <b>from</b>?</td><td>I’m from Bavaria.</td><td>Woher …?</td></tr>
+        <tr><td><b>Who</b> is that?</td><td>It’s Michael Jackson.</td><td>Wer …?</td></tr>
+        <tr><td><b>What</b> is this?</td><td>It’s a smoke detector.</td><td>Was …?</td></tr>
+        <tr><td><b>How old</b> are you?</td><td>I’m eleven.</td><td>Wie alt …?</td></tr>
+      </table>
+      <div class="warn">⚠️ Achtung Falle: <b>Where</b> heißt <b>Wo</b> (nicht „wer“)!<br><b>Who</b> heißt <b>Wer</b> (nicht „wo“)!</div>
+      <div class="tip">✂️ Nach dem Fragewort wird <b>is</b> oft verkürzt:<br>Where’s …? · Who’s …? · What’s …? · How’s …?</div>
+      <div class="row"><button class="btn" onclick="closeModal()">Alles klar! 👍</button></div>
+    </div>
+  </div>`;
+}
+function closeModal(){modal.innerHTML='';}
+
+menu();
+</script>
+</body>
+</html>

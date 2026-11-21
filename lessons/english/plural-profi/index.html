@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Plural-Profi – Nomen im Singular und Plural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#ffffff; --ink:#1d2433; --muted:#5f6b7d; --line:#e3ddd0;
+    --red:#d7302a; --red-dark:#a91f1a;
+    --snake:#2f9e57; --snake-bg:#e3f5e9;
+    --bee:#e2a400; --bee-bg:#fff4cc;
+    --iz:#3b5bdb; --iz-bg:#e5ebff;
+    --good:#2f9e57; --bad:#d7302a; --warn:#e8890c;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:"Nunito",system-ui,sans-serif;color:var(--ink);background:var(--bg);
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    touch-action:manipulation;-webkit-user-select:none;user-select:none;
+  }
+  h1,h2,h3,.display{font-family:"Fredoka",system-ui,sans-serif;margin:0}
+  button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulation}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 18px 40px;min-height:100%}
+  .screen{display:none}
+  .screen.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* Header */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .badge{width:52px;height:52px;border-radius:16px;background:var(--red);display:grid;place-items:center;font-size:28px;box-shadow:0 4px 0 var(--red-dark)}
+  .brand h1{font-size:28px;line-height:1}
+  .brand p{margin:3px 0 0;color:var(--muted);font-weight:700;font-size:15px}
+  .iconbtn{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:800;font-size:16px}
+  .iconbtn:active{transform:translateY(1px)}
+
+  /* Menu */
+  .hello{background:var(--ink);color:#fff;border-radius:var(--radius);padding:22px 24px;margin-bottom:18px;display:flex;gap:16px;align-items:center}
+  .hello .big{font-size:44px}
+  .hello h2{font-size:26px}
+  .hello p{margin:4px 0 0;opacity:.85;font-size:16px}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .mode{background:var(--card);border-radius:var(--radius);padding:20px;text-align:left;border:2px solid var(--line);box-shadow:0 5px 0 var(--line);display:flex;flex-direction:column;gap:8px;min-height:170px;transition:transform .08s}
+  .mode:active{transform:translateY(4px);box-shadow:0 1px 0 var(--line)}
+  .mode .emo{font-size:38px}
+  .mode h3{font-size:22px}
+  .mode p{margin:0;color:var(--muted);font-size:15px;line-height:1.35}
+  .mode .rec{margin-top:auto;font-size:13px;font-weight:800;color:var(--muted)}
+  .mode.m1{border-color:#cfe9d8;box-shadow:0 5px 0 #cfe9d8}
+  .mode.m2{border-color:#f6d9d7;box-shadow:0 5px 0 #f6d9d7}
+  .mode.m3{border-color:#d5ddfb;box-shadow:0 5px 0 #d5ddfb}
+  .mode.m4{border-color:#f3e6b5;box-shadow:0 5px 0 #f3e6b5}
+
+  /* Game */
+  .gamehead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .progress{flex:1;height:16px;background:#e7e1d4;border-radius:99px;overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:var(--red);border-radius:99px;transition:width .3s}
+  .score{font-family:"Fredoka";font-weight:700;font-size:20px;min-width:72px;text-align:right}
+  .card{background:var(--card);border-radius:24px;padding:26px 22px;border:2px solid var(--line);text-align:center}
+  .task{color:var(--muted);font-weight:800;font-size:16px;margin-bottom:6px}
+  .wordemo{font-size:64px;line-height:1.1;margin:6px 0}
+  .word{font-family:"Fredoka";font-size:44px;font-weight:700;line-height:1.1;word-break:break-word}
+  .de{color:var(--muted);font-weight:700;font-size:16px;margin-top:4px}
+  .speak{margin-top:10px;background:#f1ede3;border-radius:99px;padding:8px 16px;font-weight:800;font-size:15px}
+  .speak.hidden{display:none}
+
+  .sounds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  .snd{border-radius:20px;padding:16px 8px 14px;font-weight:800;border:3px solid transparent;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .08s}
+  .snd:active{transform:scale(.97)}
+  .snd .e{font-size:44px;line-height:1}
+  .snd .ipa{font-family:"Fredoka";font-size:30px;font-weight:700}
+  .snd .lbl{font-size:13px;line-height:1.2;opacity:.85}
+  .snd.s{background:var(--snake-bg);color:#1b6b3a;border-color:#bfe5cb}
+  .snd.z{background:var(--bee-bg);color:#7a5800;border-color:#f3dc8a}
+  .snd.iz{background:var(--iz-bg);color:#24399a;border-color:#c3cffa}
+  .snd.right{outline:5px solid var(--good);outline-offset:2px}
+  .snd.wrong{opacity:.45}
+  .snd:disabled{cursor:default}
+
+  .phrase{font-family:"Fredoka";font-size:30px;font-weight:600;margin:10px 0 6px}
+  form.typer{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .typer input{
+    font-family:"Fredoka";font-size:30px;font-weight:600;padding:12px 16px;border-radius:16px;
+    border:3px solid var(--line);width:min(360px,100%);text-align:center;color:var(--ink);background:#fffdf8;
+    -webkit-user-select:text;user-select:text;
+  }
+  .typer input:focus{outline:none;border-color:var(--ink)}
+  .typer input.ok{border-color:var(--good);background:#eefaf2}
+  .typer input.no{border-color:var(--bad);background:#fdeeee;animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .btn{background:var(--red);color:#fff;font-weight:800;font-size:19px;padding:14px 24px;border-radius:16px;box-shadow:0 4px 0 var(--red-dark)}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-dark)}
+  .btn.dark{background:var(--ink);box-shadow:0 4px 0 #000}
+  .btn.light{background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+
+  .feedback{margin-top:16px;border-radius:18px;padding:14px 16px;text-align:left;font-size:17px;line-height:1.4;display:none}
+  .feedback.show{display:block;animation:fade .2s}
+  .feedback.good{background:#e8f7ed;color:#18562f}
+  .feedback.bad{background:#fdecea;color:#7d1b17}
+  .feedback.hint{background:#fff3df;color:#7a4300}
+  .feedback b.head{font-family:"Fredoka";font-size:21px;display:block;margin-bottom:2px}
+  .next{margin-top:16px;display:none}
+  .next.show{display:inline-block}
+  .stepdots{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+  .stepdots span{font-size:13px;font-weight:800;padding:4px 10px;border-radius:99px;background:#efe9dc;color:var(--muted)}
+  .stepdots span.on{background:var(--ink);color:#fff}
+  .solved{font-family:"Fredoka";font-size:26px;color:var(--good);margin-top:6px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+  .chip{background:var(--card);border:2px solid var(--line);border-radius:99px;padding:9px 14px;font-weight:800;font-size:15px}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* Result */
+  .result{text-align:center}
+  .stars{font-size:56px;letter-spacing:6px;margin:6px 0}
+  .result h2{font-size:32px}
+  .result .pts{font-family:"Fredoka";font-size:22px;color:var(--muted);margin-top:4px}
+  .boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:20px 0;text-align:left}
+  .box{border-radius:20px;padding:16px 18px}
+  .box h3{font-size:19px;margin-bottom:8px}
+  .box.can{background:#e8f7ed}
+  .box.again{background:#fff3df}
+  .box ul{margin:0;padding-left:20px;line-height:1.6;font-size:16px}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+  /* Cheat sheet */
+  .sheet h2{font-size:26px;margin-bottom:12px}
+  .rulegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+  .rule{border-radius:20px;padding:16px}
+  .rule .top2{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .rule .e{font-size:36px}
+  .rule .ipa{font-family:"Fredoka";font-size:28px;font-weight:700}
+  .rule p{margin:4px 0;font-size:16px;line-height:1.4}
+  .rule .ex{font-weight:800}
+  .rule.s{background:var(--snake-bg)} .rule.z{background:var(--bee-bg)} .rule.iz{background:var(--iz-bg)}
+  table.spell{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:18px;overflow:hidden;border:2px solid var(--line);font-size:16px}
+  .spell th,.spell td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  .spell th{background:#f1ede3;font-family:"Fredoka";font-size:17px}
+  .spell tr:last-child td{border-bottom:0}
+  .tip{margin-top:14px;background:var(--ink);color:#fff;border-radius:18px;padding:14px 16px;font-size:16px;line-height:1.45}
+
+  .yv,.yc{font-weight:800;padding:0 3px;border-radius:5px;font-style:normal}
+  .yv{background:#cdeed8;color:#17602f}
+  .yc{background:#f9d3d0;color:#8f1d18}
+  .pop{animation:pop .35s ease}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+  @media (max-width:520px){
+    .word{font-size:36px}.wordemo{font-size:52px}
+    .snd .e{font-size:34px}.snd .ipa{font-size:24px}.snd .lbl{font-size:11px}
+    .brand h1{font-size:23px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- MENU -->
+  <section id="menu" class="screen active">
+    <div class="top">
+      <div class="brand">
+        <div class="badge">🚒</div>
+        <div><h1>Plural-Profi</h1><p>G1 · Nomen im Singular und Plural</p></div>
+      </div>
+      <button class="iconbtn" onclick="show('sheet')">📋 Spickzettel</button>
+    </div>
+
+    <div class="hello">
+      <div class="big">👋</div>
+      <div>
+        <h2 id="helloTitle">Hallo!</h2>
+        <p id="helloText">Eine Runde = 10 Wörter, ca. 5 Minuten. Fehler sind erlaubt – du bekommst immer einen Tipp und einen zweiten Versuch.</p>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode m1" onclick="startRound('sound')">
+        <div class="emo">🐍 🐝 🔔</div>
+        <h3>Laut-Detektiv</h3>
+        <p>Wie klingt die Plural-Endung? Schlange [s], Biene [z] oder Zischlaut [ɪz]?</p>
+        <div class="rec" id="rec-sound"></div>
+      </button>
+      <button class="mode m2" onclick="openWerkstatt()">
+        <div class="emo">🔧</div>
+        <h3>Plural-Werkstatt</h3>
+        <p>Schreib den Plural: -s, -es, -ies, -ves oder unregelmäßig?</p>
+        <div class="rec" id="rec-write"></div>
+      </button>
+      <button class="mode m3" onclick="startRound('double')">
+        <div class="emo">✍️ + 🐝</div>
+        <h3>Doppel-Check</h3>
+        <p>Wie im Arbeitsblatt: Plural schreiben <b>und</b> dem richtigen Laut zuordnen.</p>
+        <div class="rec" id="rec-double"></div>
+      </button>
+      <button class="mode m4" onclick="show('sheet')">
+        <div class="emo">📋</div>
+        <h3>Spickzettel</h3>
+        <p>Alle Regeln auf einen Blick – zum Nachschauen, bevor du loslegst.</p>
+        <div class="rec">&nbsp;</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- WERKSTATT FOCUS -->
+  <section id="werkstatt" class="screen">
+    <div class="top">
+      <div class="brand"><div class="badge">🔧</div><div><h1>Plural-Werkstatt</h1><p>Was willst du heute üben?</p></div></div>
+      <button class="iconbtn" onclick="show('menu')">✕ Menü</button>
+    </div>
+    <div class="modes">
+      <button class="mode m2" onclick="startRound('write','mix')"><div class="emo">🎲</div><h3>Bunter Mix</h3><p>Alle Arten durcheinander – wie in der Schulaufgabe.</p><div class="rec"></div></button>
+      <button class="mode m2" onclick="startRound('write','ses')"><div class="emo">➕</div><h3>-s oder -es?</h3><p>box → boxes, bus → buses, aber car → cars.</p><div class="rec"></div></button>
+      <button class="mode m2" onclick="startRound('write','y')"><div class="emo">👶</div><h3>Wörter mit -y</h3><p>baby → babies, aber boy → boys. Der Klassiker!</p><div class="rec"></div></button>
+      <button class="mode m2" onclick="startRound('write','irr')"><div class="emo">🐭</div><h3>-ves & unregelmäßig</h3><p>shelf → shelves, mouse → mice, child → children …</p><div class="rec"></div></button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="screen">
+    <div class="gamehead">
+      <button class="iconbtn" onclick="quitRound()">✕</button>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="score" id="score">0 ⭐</div>
+    </div>
+    <div class="card" id="card"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen">
+    <div class="card result" id="resultCard"></div>
+  </section>
+
+  <!-- CHEAT SHEET -->
+  <section id="sheet" class="screen sheet">
+    <div class="top">
+      <div class="brand"><div class="badge">📋</div><div><h1>Spickzettel</h1><p>Plural bilden & aussprechen</p></div></div>
+      <button class="iconbtn" onclick="show('menu')">✕ Menü</button>
+    </div>
+
+    <h2>1 · Wie klingt die Endung?</h2>
+    <div class="rulegrid">
+      <div class="rule s">
+        <div class="top2"><span class="e">🐍</span><span class="ipa">[s]</span></div>
+        <p>Nach <b>harten</b> (stimmlosen) Lauten <b>[p] [t] [k] [f]</b></p>
+        <p class="ex">parks · flats · helmets · cups</p>
+      </div>
+      <div class="rule z">
+        <div class="top2"><span class="e">🐝</span><span class="ipa">[z]</span></div>
+        <p>Nach <b>weichen</b> (stimmhaften) Lauten <b>[b] [d] [g] [l] [m] [n] [v]</b> und nach <b>Vokalen</b></p>
+        <p class="ex">boys · beds · trees · fire engines</p>
+      </div>
+      <div class="rule iz">
+        <div class="top2"><span class="e">🔔</span><span class="ipa">[ɪz]</span></div>
+        <p>Nach <b>Zischlauten</b>: -s, -ss, -ce, -se, -x, -sh, -ch, -ge, -dge</p>
+        <p>Hier kommt eine <b>extra Silbe</b> dazu: hou-<b>ses</b></p>
+        <p class="ex">houses · boxes · switches · fridges</p>
+      </div>
+    </div>
+
+    <h2>2 · Wie schreibe ich den Plural?</h2>
+    <table class="spell">
+      <tr><th>Regel</th><th>Beispiele</th></tr>
+      <tr><td><b>Meistens:</b> einfach <b>-s</b> anhängen</td><td>dog → dogs, ladder → ladders</td></tr>
+      <tr><td>Nach <b>s, ss, x, sh, ch</b> → <b>-es</b></td><td>bus → buses, box → boxes, torch → torches</td></tr>
+      <tr><td><b>Wörter mit -y:</b> Schau, was <b>vor dem y</b> steht.<br>
+        Vokal (a, e, i, o, u)? → y bleibt, nur <b>-s</b><br>
+        Kein Vokal? → <b>-ies</b><br>
+        🚒 <i><b>Ein Vokal rettet das y, sonst nimm -ies.</b></i></td>
+        <td>b<span class="yv">o</span>y → boys, k<span class="yv">e</span>y → keys<br>
+        ba<span class="yc">b</span>y → babies, fami<span class="yc">l</span>y → families</td></tr>
+      <tr><td>Manche Wörter mit <b>-f / -fe</b> → <b>-ves</b></td><td>shelf → shelves, thief → thieves, wolf → wolves</td></tr>
+      <tr><td><b>Unregelmäßig</b> – auswendig lernen!</td><td>mouse → mice, child → children, man → men, woman → women, foot → feet, tooth → teeth, person → people, sheep → sheep, fish → fish</td></tr>
+    </table>
+    <div class="tip">💡 <b>Merke:</b> Im Plural gibt es <b>nie einen Apostroph</b>! two cats ✅ – two cat's ❌<br>
+    🔔 <b>Zischlaut-Trick:</b> Wenn du beim Sprechen eine Silbe mehr hörst (box – bo-xes), ist es [ɪz].</div>
+    <div style="text-align:center;margin-top:18px"><button class="btn" onclick="show('menu')">Los geht's!</button></div>
+  </section>
+
+</div>
+
+<script>
+/* ---------- WORD DATA ----------
+ sg | pl | sound (s/z/iz/-) | end (Endlaut / Endung) | deutsch | emoji | spelling rule
+ rules: s, es, ies, ys, ves, irr                                              */
+const RAW = `
+park|parks|s|[k]|Park|🏞️|s
+flat|flats|s|[t]|Wohnung|🏢|s
+biscuit|biscuits|s|[t]|Keks|🍪|s
+clock|clocks|s|[k]|Uhr|⏰|s
+street|streets|s|[t]|Straße|🛣️|s
+cat|cats|s|[t]|Katze|🐱|s
+aunt|aunts|s|[t]|Tante|👩‍🦰|s
+rabbit|rabbits|s|[t]|Kaninchen|🐰|s
+helmet|helmets|s|[t]|Helm|⛑️|s
+truck|trucks|s|[k]|Lastwagen|🚚|s
+light|lights|s|[t]|Licht, Lampe|💡|s
+jacket|jackets|s|[t]|Jacke|🧥|s
+hat|hats|s|[t]|Hut|🎩|s
+book|books|s|[k]|Buch|📖|s
+map|maps|s|[p]|Landkarte|🗺️|s
+cup|cups|s|[p]|Tasse|☕|s
+shop|shops|s|[p]|Laden|🏪|s
+boot|boots|s|[t]|Stiefel|🥾|s
+robot|robots|s|[t]|Roboter|🤖|s
+boy|boys|z|Vokal|Junge|👦|ys
+bed|beds|z|[d]|Bett|🛏️|s
+tree|trees|z|Vokal|Baum|🌳|s
+home|homes|z|[m]|Zuhause|🏡|s
+squirrel|squirrels|z|[l]|Eichhörnchen|🐿️|s
+school|schools|z|[l]|Schule|🏫|s
+wardrobe|wardrobes|z|[b]|Kleiderschrank|🚪|s
+dog|dogs|z|[g]|Hund|🐶|s
+sister|sisters|z|Vokal [ə]|Schwester|👧|s
+brother|brothers|z|Vokal [ə]|Bruder|🧑|s
+fire engine|fire engines|z|[n]|Feuerwehrauto|🚒|s
+firefighter|firefighters|z|Vokal [ə]|Feuerwehrmann/-frau|🧑‍🚒|s
+ladder|ladders|z|Vokal [ə]|Leiter|🪜|s
+siren|sirens|z|[n]|Sirene|🚨|s
+wheel|wheels|z|[l]|Rad|🛞|s
+tractor|tractors|z|Vokal [ə]|Traktor, Bulldog|🚜|s
+car|cars|z|Vokal|Auto|🚗|s
+cable|cables|z|[l]|Kabel|🔌|s
+doctor|doctors|z|Vokal [ə]|Arzt, Ärztin|🩺|s
+hospital|hospitals|z|[l]|Krankenhaus|🏥|s
+song|songs|z|[ŋ]|Lied|🎵|s
+glove|gloves|z|[v]|Handschuh|🧤|s
+dancer|dancers|z|Vokal [ə]|Tänzer|🕺|s
+star|stars|z|Vokal|Star, Stern|🌟|s
+phone|phones|z|[n]|Telefon, Handy|📱|s
+hero|heroes|z|Vokal|Held|🦸|es
+battery|batteries|z|Vokal|Batterie|🔋|ies
+baby|babies|z|Vokal|Baby|👶|ies
+family|families|z|Vokal|Familie|👨‍👩‍👧|ies
+hobby|hobbies|z|Vokal|Hobby|🎨|ies
+city|cities|z|Vokal|Stadt|🏙️|ies
+party|parties|z|Vokal|Party|🎉|ies
+key|keys|z|Vokal|Schlüssel|🔑|ys
+toy|toys|z|Vokal|Spielzeug|🧸|ys
+day|days|z|Vokal|Tag|📅|ys
+shelf|shelves|z|[v]|Regal|📚|ves
+leaf|leaves|z|[v]|Blatt|🍂|ves
+thief|thieves|z|[v]|Dieb|🦹|ves
+wolf|wolves|z|[v]|Wolf|🐺|ves
+half|halves|z|[v]|Hälfte|🌗|ves
+house|houses|iz|-se|Haus|🏠|s
+sentence|sentences|iz|-ce|Satz|✏️|s
+fridge|fridges|iz|-dge|Kühlschrank|🧊|s
+garage|garages|iz|-ge|Garage|🏚️|s
+page|pages|iz|-ge|Seite|📄|s
+badge|badges|iz|-dge|Polizeimarke, Abzeichen|📛|s
+bridge|bridges|iz|-dge|Brücke|🌉|s
+bandage|bandages|iz|-ge|Verband|🩹|s
+nurse|nurses|iz|-se|Krankenpfleger(in)|🧑‍⚕️|s
+horse|horses|iz|-se|Pferd|🐴|s
+hose|hoses|iz|-se|(Feuerwehr-)Schlauch|🧯|s
+nose|noses|iz|-se|Nase|👃|s
+face|faces|iz|-ce|Gesicht|🙂|s
+dance|dances|iz|-ce|Tanz|💃|s
+box|boxes|iz|-x|Kiste, Schachtel|📦|es
+fox|foxes|iz|-x|Fuchs|🦊|es
+bus|buses|iz|-s|Bus|🚌|es
+glass|glasses|iz|-ss|Glas|🥛|es
+watch|watches|iz|-ch|Armbanduhr|⌚|es
+switch|switches|iz|-ch|Schalter|🎚️|es
+torch|torches|iz|-ch|Taschenlampe|🔦|es
+bench|benches|iz|-ch|Sitzbank|🪑|es
+brush|brushes|iz|-sh|Pinsel, Bürste|🖌️|es
+mouse|mice|-||Maus|🐭|irr
+child|children|-||Kind|🧒|irr
+man|men|-||Mann|👨|irr
+woman|women|-||Frau|👩|irr
+policeman|policemen|-||Polizist|👮|irr
+foot|feet|-||Fuß|🦶|irr
+tooth|teeth|-||Zahn|🦷|irr
+person|people|-||Person|🧍|irr
+sheep|sheep|-||Schaf|🐑|irr
+fish|fish|-||Fisch|🐟|irr`;
+const WORDS = RAW.trim().split('\n').map(l=>{
+  const [sg,pl,snd,end,de,emo,rule]=l.split('|');
+  return {sg,pl,snd:snd==='-'?null:snd,end,de,emo,rule};
+});
+
+const SND = {
+  s:{e:'🐍',ipa:'[s]',name:'Schlange',lbl:'harter Laut'},
+  z:{e:'🐝',ipa:'[z]',name:'Biene',lbl:'weicher Laut / Vokal'},
+  iz:{e:'🔔',ipa:'[ɪz]',name:'Zischlaut',lbl:'Zischlaut – extra Silbe'}
+};
+const RULE_TXT = {
+  s:'Ganz normal: einfach <b>-s</b> anhängen.',
+  es:'Nach <b>s, ss, x, sh, ch</b> (und bei hero) hängst du <b>-es</b> an.',
+  ies:'Kein Vokal vor dem y – also wird das y zu <b>-ies</b>.',
+  ys:'Ein Vokal vor dem y rettet das y – nur <b>-s</b> dran.',
+  ves:'Hier wird <b>-f / -fe</b> zu <b>-ves</b>.',
+  irr:'Das ist ein <b>unregelmäßiges</b> Wort – das muss man sich merken.'
+};
+const PRAISE = ['Stark! 💪','Genau richtig! 🎯','Super! 🔥','Volltreffer! 🚒','Klasse! ⭐','Wie ein Profi! 🏆','Richtig! 👌','Spitze! 🕺'];
+const ENCOURAGE = ['Fast! Noch ein Versuch 🙂','Kein Problem – schau dir den Tipp an!','Knapp daneben – du schaffst das!'];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- STORAGE (optional) ---------- */
+function load(){try{return JSON.parse(localStorage.getItem('pluralProfi')||'{}')}catch(e){return {}}}
+function save(d){try{localStorage.setItem('pluralProfi',JSON.stringify(d))}catch(e){}}
+function renderRecords(){
+  const d=load();
+  const t={sound:'Laut-Detektiv',write:'Werkstatt',double:'Doppel-Check'};
+  for(const k of Object.keys(t)){
+    const el=document.getElementById('rec-'+k);
+    if(!el) continue;
+    const r=d[k];
+    el.textContent = r ? `🏆 Bestes Ergebnis: ${r.best}% · ${r.rounds} Runde${r.rounds>1?'n':''}` : 'Noch nicht gespielt';
+  }
+  const total=Object.values(d).reduce((a,r)=>a+(r&&r.rounds||0),0);
+  if(total>0){
+    document.getElementById('helloTitle').textContent='Willkommen zurück!';
+    document.getElementById('helloText').textContent=`Du hast schon ${total} Runde${total>1?'n':''} geschafft. Eine Runde = 10 Wörter, ca. 5 Minuten. Fehler sind erlaubt – es gibt immer einen Tipp und einen zweiten Versuch.`;
+  }
+}
+
+/* ---------- SPEECH (optional) ---------- */
+let canSpeak=false;
+try{canSpeak='speechSynthesis' in window && typeof SpeechSynthesisUtterance!=='undefined'}catch(e){}
+function speak(text){
+  if(!canSpeak) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    const voices=speechSynthesis.getVoices();
+    const v=voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang));
+    if(v) u.voice=v;
+    u.lang=v?v.lang:'en-GB'; u.rate=0.85;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+if(canSpeak){try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}}
+
+/* ---------- NAV ---------- */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+  window.scrollTo(0,0);
+  if(id==='menu') renderRecords();
+}
+function openWerkstatt(){show('werkstatt')}
+
+/* ---------- ROUND STATE ---------- */
+let R=null;
+function poolFor(mode,focus){
+  if(mode==='sound') return WORDS.filter(w=>w.snd);
+  if(mode==='double') return WORDS.filter(w=>w.snd);
+  if(focus==='ses') return WORDS.filter(w=>w.rule==='es'||w.rule==='s');
+  if(focus==='y') return WORDS.filter(w=>w.rule==='ies'||w.rule==='ys');
+  if(focus==='irr') return WORDS.filter(w=>w.rule==='irr'||w.rule==='ves');
+  return WORDS;
+}
+function balancedSample(mode,focus,n){
+  const pool=poolFor(mode,focus);
+  if(mode==='sound'||mode==='double'){
+    // gleich viele Wörter pro Laut
+    const by={s:[],z:[],iz:[]};
+    shuffle(pool).forEach(w=>by[w.snd].push(w));
+    const out=[];const keys=['s','z','iz'];let i=0;
+    while(out.length<n){const k=keys[i%3];if(by[k].length) out.push(by[k].pop());i++;}
+    return shuffle(out);
+  }
+  if(focus==='ses'){
+    const es=shuffle(pool.filter(w=>w.rule==='es')).slice(0,5);
+    const s=shuffle(pool.filter(w=>w.rule==='s')).slice(0,n-es.length);
+    return shuffle(es.concat(s));
+  }
+  if(focus==='mix'){
+    const groups=['s','es','ies','ys','ves','irr'];
+    const quota={s:2,es:2,ies:2,ys:1,ves:1,irr:2};
+    let out=[];
+    groups.forEach(g=>{out=out.concat(shuffle(pool.filter(w=>w.rule===g)).slice(0,quota[g]))});
+    return shuffle(out).slice(0,n);
+  }
+  return shuffle(pool).slice(0,n);
+}
+function startRound(mode,focus,custom){
+  const items = custom ? shuffle(custom) : balancedSample(mode,focus||'mix',10);
+  const per = mode==='double'?2:1;
+  R={mode,focus:focus||'mix',items,i:0,points:0,max:items.length*per,results:[],step:0,tries:0,itemPts:0};
+  show('game');
+  renderItem();
+}
+function quitRound(){
+  if(R && R.i>0 && R.i<R.items.length){ finishRound(); } else show('menu');
+}
+function updateHead(){
+  document.getElementById('bar').style.width=(R.i/R.items.length*100)+'%';
+  const p=Math.round(R.points*10)/10;
+  document.getElementById('score').textContent=`${String(p).replace('.',',')} ⭐`;
+}
+
+/* ---------- RENDER ITEM ---------- */
+function renderItem(){
+  updateHead();
+  const w=R.items[R.i];
+  R.tries=0;R.step=0;R.itemPts=0;R.firstTry=true;
+  const card=document.getElementById('card');
+  if(R.mode==='sound') card.innerHTML=soundHTML(w,true);
+  else card.innerHTML=writeHTML(w);
+  bindItem();
+}
+function speakBtn(text){
+  return canSpeak?`<button class="speak" onclick="speak('${text.replace(/'/g,"\\'")}')">🔊 Anhören</button>`:'';
+}
+function soundHTML(w,showWord){
+  return `
+    ${R.mode==='double'?stepDots(2):''}
+    <div class="task">Wie klingt die Endung im Plural?</div>
+    <div class="wordemo">${w.emo}</div>
+    <div class="word">two ${w.pl}</div>
+    <div class="de">${w.de}</div>
+    ${speakBtn('two '+w.pl)}
+    <div class="sounds">
+      ${['s','z','iz'].map(k=>`<button class="snd ${k}" data-k="${k}"><span class="e">${SND[k].e}</span><span class="ipa">${SND[k].ipa}</span><span class="lbl">${SND[k].lbl}</span></button>`).join('')}
+    </div>
+    <div class="feedback" id="fb"></div>
+    <button class="btn dark next" id="nextBtn">Weiter ➜</button>`;
+}
+function stepDots(active){
+  return `<div class="stepdots"><span class="${active===1?'on':''}">1 · Schreiben</span><span class="${active===2?'on':''}">2 · Laut</span></div>`;
+}
+function writeHTML(w){
+  return `
+    ${R.mode==='double'?stepDots(1):''}
+    <div class="task">Schreib den Plural!</div>
+    <div class="wordemo">${w.emo}</div>
+    <div class="phrase">one ${w.sg} → two …</div>
+    <div class="de">${w.de}</div>
+    <form class="typer" id="typer" autocomplete="off">
+      <input id="ans" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Plural …" aria-label="Pluralform">
+      <button class="btn" type="submit">Prüfen</button>
+    </form>
+    <div class="feedback" id="fb"></div>
+    <button class="btn dark next" id="nextBtn">Weiter ➜</button>`;
+}
+function bindItem(){
+  const card=document.getElementById('card');
+  card.querySelectorAll('.snd').forEach(b=>b.addEventListener('click',()=>answerSound(b.dataset.k,b)));
+  const f=document.getElementById('typer');
+  if(f){
+    f.addEventListener('submit',e=>{e.preventDefault();answerWrite()});
+    const inp=document.getElementById('ans');
+    setTimeout(()=>{try{inp.focus()}catch(e){}},80);
+  }
+  document.getElementById('nextBtn').onclick=nextItem;
+}
+function setFB(type,head,body){
+  const fb=document.getElementById('fb');
+  fb.className='feedback show '+type;
+  fb.innerHTML=`<b class="head">${head}</b>${body}`;
+}
+
+/* ---------- SOUND ANSWER ---------- */
+function soundExplain(w){
+  const s=SND[w.snd];
+  if(w.snd==='iz') return `<b>${w.sg}</b> endet auf einen <b>Zischlaut</b> (${w.end}). Darum kommt eine extra Silbe dazu → ${s.e} <b>${s.ipa}</b>`;
+  if(w.snd==='s') return `<b>${w.sg}</b> endet auf den <b>harten</b> Laut ${w.end} → ${s.e} <b>${s.ipa}</b> wie die Schlange.`;
+  const what = w.end.startsWith('Vokal') ? `einen <b>Vokal</b> ${w.end.replace('Vokal','').trim()}` : `den <b>weichen</b> Laut ${w.end}`;
+  return `<b>${w.sg}</b> endet auf ${what} → ${s.e} <b>${s.ipa}</b> wie die Biene.`;
+}
+function answerSound(k,btn){
+  const w=R.items[R.i];
+  const all=document.querySelectorAll('.snd');
+  if(k===w.snd){
+    all.forEach(b=>{b.disabled=true;if(b.dataset.k===k)b.classList.add('right','pop');else b.classList.add('wrong')});
+    const pts = R.tries===0?1:0.5;
+    R.itemPts+=pts;
+    setFB('good',pick(PRAISE),soundExplain(w));
+    if(R.mode==='double'){ R.soundOK = R.tries===0; }
+    finishItem();
+  }else{
+    R.tries++;R.firstTry=false;
+    btn.classList.add('wrong');btn.disabled=true;
+    if(R.tries===1){
+      setFB('hint',pick(ENCOURAGE), hintForSound(w));
+    }else{
+      all.forEach(b=>{b.disabled=true;if(b.dataset.k===w.snd)b.classList.add('right')});
+      setFB('bad','Das war knifflig!',soundExplain(w));
+      finishItem();
+    }
+  }
+}
+function hintForSound(w){
+  return `Tipp: Wie endet <b>${w.sg}</b>? Sprich es leise aus.<br>Harter Laut (p, t, k, f) → 🐍 · weicher Laut oder Vokal → 🐝 · Zischlaut (s, x, sh, ch, ge …) → 🔔`;
+}
+
+/* ---------- WRITE ANSWER ---------- */
+function norm(s){return s.toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g,' ').trim().replace(/^two /,'')}
+function lev(a,b){const m=[];for(let i=0;i<=a.length;i++){m[i]=[i]}for(let j=1;j<=b.length;j++)m[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
+/* y-Wörter: Buchstabe vor dem y prüfen – "Ein Vokal rettet das y, sonst nimm -ies." */
+function yInfo(w){
+  const before=w.sg.slice(-2,-1);
+  const isV=/[aeiou]/.test(before);
+  const mark=`<span class="${isV?'yv':'yc'}">${before}</span>`;
+  return {before,isV,mark,word:`<i>${w.sg.slice(0,-2)}${mark}<b>y</b></i>`};
+}
+function yHint(w){
+  const y=yInfo(w);
+  return `🔍 Schau, was <b>vor dem y</b> steht: In ${y.word} ist das ein <b>${y.mark}</b>.<br>
+          Ist das ein Vokal (a, e, i, o, u)? ⇒ 🚒 <i><b>Ein Vokal rettet das y, sonst nimm -ies.</b></i>`;
+}
+function ySolution(w){
+  const y=yInfo(w);
+  return y.isV
+    ? `Vor dem y steht ein <b>${y.mark}</b> – das ist ein Vokal. Das <b>${y.mark}</b> rettet das y 🧑‍🚒 → nur <b>-s</b> dran.`
+    : `Vor dem y steht ein <b>${y.mark}</b> – das ist kein Vokal. Kein Retter da → das y wird zu <b>-ies</b>.`;
+}
+function yPraise(w){
+  const y=yInfo(w);
+  return y.isV
+    ? `<b>${w.pl}</b>: Das <b>${y.mark}</b> rettet das y 🧑‍🚒`
+    : `<b>${w.pl}</b>: Kein Vokal vor dem y → -ies.`;
+}
+function writeHint(w,a){
+  if(a.includes("'")) return `Im Plural gibt es <b>keinen Apostroph</b>! (two cat's ❌ → two cats ✅)`;
+  if(a===w.sg) return `Das ist noch der Singular – es sind doch <b>zwei</b>! 😉`;
+  if(w.rule==='ies'||w.rule==='ys') return yHint(w);
+  if(w.rule==='es'&&a===w.sg+'s') return `Das Wort endet auf <b>${w.end.replace('-','')}</b> – da hängst du <b>-es</b> an.`;
+  if(w.rule==='s'&&a===w.sg+'es'&&!w.sg.endsWith('e')) return `Hier reicht ein einfaches <b>-s</b>.`;
+  if(w.rule==='s'&&a===w.sg+'es') return `Das Wort endet schon auf <b>-e</b> – da kommt nur noch ein <b>-s</b> dran.`;
+  if(w.rule==='ves'&&(a.endsWith('fs')||a.endsWith('fes'))) return `Dieses Wort gehört zu den <b>f → ves</b>-Wörtern.`;
+  if(w.rule==='irr') return `Das ist ein <b>unregelmäßiges</b> Wort – da hilft kein -s. Kennst du die besondere Form? Erster Buchstabe: <b>${w.pl[0]}</b>`;
+  if(lev(a,w.pl)<=1) return `Ganz knapp! Prüf die <b>Rechtschreibung</b> noch einmal Buchstabe für Buchstabe.`;
+  return `Tipp: ${RULE_TXT[w.rule]}`;
+}
+function answerWrite(){
+  const w=R.items[R.i];
+  const inp=document.getElementById('ans');
+  const a=norm(inp.value);
+  if(!a){inp.focus();return}
+  if(a===w.pl){
+    inp.classList.remove('no');inp.classList.add('ok','pop');inp.disabled=true;
+    document.querySelector('#typer button').disabled=true;
+    const pts=R.tries===0?1:0.5;R.itemPts+=pts;
+    if(R.tries>0) R.firstTry=false;
+    const isY = w.rule==='ies'||w.rule==='ys';
+    const extra = w.rule==='s'?'':`<br>${RULE_TXT[w.rule]}`;
+    if(R.mode==='double'){
+      R.writeOK=R.tries===0;
+      setFB('good',pick(PRAISE), isY?yPraise(w):`<b>${w.sg} → ${w.pl}</b>${extra}`);
+      // nach kurzer Pause zu Schritt 2
+      setTimeout(()=>goSoundStep(w),900);
+    }else{
+      setFB('good',pick(PRAISE), isY?yPraise(w):`<b>${w.sg} → ${w.pl}</b>${extra}`);
+      finishItem();
+    }
+  }else{
+    R.tries++;R.firstTry=false;
+    inp.classList.remove('no');void inp.offsetWidth;inp.classList.add('no');
+    if(R.tries===1){
+      setFB('hint',pick(ENCOURAGE),writeHint(w,a));
+      try{inp.select()}catch(e){}
+    }else{
+      inp.disabled=true;document.querySelector('#typer button').disabled=true;
+      const why = (w.rule==='ies'||w.rule==='ys') ? ySolution(w) : RULE_TXT[w.rule];
+      setFB('bad','Richtig wäre:',`<span style="font-family:Fredoka;font-size:26px">${w.sg} → <b>${w.pl}</b></span><br>${why}`);
+      if(R.mode==='double'){
+        R.writeOK=false;
+        const nb=document.getElementById('nextBtn');
+        nb.textContent='Weiter zum Laut ➜';nb.classList.add('show');
+        nb.onclick=()=>goSoundStep(w);
+      }else finishItem();
+    }
+  }
+}
+function goSoundStep(w){
+  R.step=1;R.tries=0;
+  document.getElementById('card').innerHTML=soundHTML(w);
+  bindItem();
+}
+
+/* ---------- FINISH ITEM / ROUND ---------- */
+function finishItem(){
+  const w=R.items[R.i];
+  R.points+=R.itemPts;
+  const per=R.mode==='double'?2:1;
+  const perfect = R.mode==='double' ? (R.writeOK && R.soundOK) : R.firstTry;
+  R.results.push({w,pts:R.itemPts,max:per,perfect});
+  updateHead();
+  const nb=document.getElementById('nextBtn');
+  nb.textContent = R.i===R.items.length-1 ? 'Zum Ergebnis 🏁' : 'Weiter ➜';
+  nb.classList.add('show');
+  nb.onclick=nextItem;
+  setTimeout(()=>{try{nb.focus()}catch(e){}},50);
+}
+function nextItem(){
+  R.i++;
+  if(R.i>=R.items.length) finishRound(); else renderItem();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const nb=document.getElementById('nextBtn');if(nb&&nb.classList.contains('show')&&document.activeElement.id!=='ans'){e.preventDefault();nb.click()}}
+});
+
+function finishRound(){
+  const done=R.results.length;
+  const max=R.results.reduce((a,r)=>a+r.max,0)||1;
+  const pts=R.results.reduce((a,r)=>a+r.pts,0);
+  const pct=Math.round(pts/max*100);
+  const stars = pct>=90?3:pct>=65?2:pct>=35?1:0;
+  const title = pct>=90?'Plural-Profi! 🏆':pct>=65?'Richtig gut! 💪':pct>=35?'Du bist auf dem Weg! 🚀':'Jede Runde macht dich besser! 🌱';
+  const good=R.results.filter(r=>r.perfect);
+  const bad=R.results.filter(r=>!r.perfect);
+  const ruleNames={s:'-s anhängen',es:'-es nach Zischlaut',ies:'y → ies',ys:'y bleibt (boys)',ves:'f → ves',irr:'unregelmäßige Wörter'};
+  let canList='';
+  if(R.mode==='write'){
+    const rulesOK=[...new Set(good.map(r=>r.w.rule))].map(r=>ruleNames[r]);
+    canList = rulesOK.length?`<p style="margin:0 0 6px"><b>Regeln, die sitzen:</b> ${rulesOK.join(', ')}</p>`:'';
+  }else{
+    const sOK=[...new Set(good.map(r=>r.w.snd))].map(k=>SND[k].e+' '+SND[k].ipa);
+    canList = sOK.length?`<p style="margin:0 0 6px"><b>Laute, die sitzen:</b> ${sOK.join(' · ')}</p>`:'';
+  }
+  const fmt=r=> R.mode==='write'
+     ? `${r.w.sg} → <b>${r.w.pl}</b>`
+     : R.mode==='double' ? `${r.w.sg} → <b>${r.w.pl}</b> ${SND[r.w.snd].e} ${SND[r.w.snd].ipa}`
+     : `${r.w.pl} → ${SND[r.w.snd].e} <b>${SND[r.w.snd].ipa}</b>`;
+
+  // speichern
+  if(done>0){
+    const d=load();const k=R.mode;
+    d[k]=d[k]||{best:0,rounds:0};
+    d[k].rounds++; d[k].best=Math.max(d[k].best,pct);
+    save(d);
+  }
+  const ptsTxt=String(Math.round(pts*10)/10).replace('.',',');
+  document.getElementById('resultCard').innerHTML=`
+    <div class="stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+    <h2>${title}</h2>
+    <div class="pts">${ptsTxt} von ${max} Punkten · ${pct} %${done<R.items.length?` · ${done} von ${R.items.length} Wörtern`:''}</div>
+    <div class="boxes">
+      <div class="box can"><h3>✅ Das kannst du schon</h3>${canList}
+        ${good.length?`<ul>${good.slice(0,8).map(r=>`<li>${fmt(r)}</li>`).join('')}${good.length>8?`<li>… und ${good.length-8} mehr</li>`:''}</ul>`:'<p style="margin:0">Beim nächsten Mal klappt\'s – schau vorher kurz auf den Spickzettel! 📋</p>'}
+      </div>
+      <div class="box again"><h3>🔁 Nochmal anschauen</h3>
+        ${bad.length?`<ul>${bad.map(r=>`<li>${fmt(r)}</li>`).join('')}</ul>`:'<p style="margin:0">Nichts! Alles beim ersten Versuch richtig. 🎉</p>'}
+      </div>
+    </div>
+    <div class="actions">
+      ${bad.length?`<button class="btn" id="retryBtn">🔁 Fehler nochmal üben</button>`:''}
+      <button class="btn ${bad.length?'light':''}" id="againBtn">Neue Runde</button>
+      <button class="btn light" onclick="show('menu')">Menü</button>
+    </div>`;
+  const mode=R.mode,focus=R.focus,badWords=bad.map(r=>r.w);
+  const rb=document.getElementById('retryBtn'); if(rb) rb.onclick=()=>startRound(mode,focus,badWords);
+  document.getElementById('againBtn').onclick=()=>startRound(mode,focus);
+  show('result');
+}
+
+renderRecords();
+</script>
+</body>
+</html>
