@@ -132,14 +132,67 @@ const L1 = [
     {cat:'short', l:'What is …?',  r:'What’s …?',  say:'What’s'},
     {cat:'short', l:'How is …?',   r:'How’s …?',   say:'How’s'},
   ]},
-  { task:'Welche englische Frage passt zur <b>deutschen Frage</b>?', heads:['Deutsch','Englisch'], items:[
-    {cat:'who',   l:'Wer ist das?', r:'Who’s that?', say:'Who’s that?'},
-    {cat:'where', l:'Wo ist der Brandmelder?', r:'Where’s the smoke detector?', say:'Where’s the smoke detector?'},
-    {cat:'what',  l:'Was ist das?', r:'What’s this?', say:'What’s this?'},
-    {cat:'from',  l:'Woher kommst du?', r:'Where are you from?', say:'Where are you from?'},
-    {cat:'howold',l:'Wie alt ist dein Bulldog?', r:'How old is your Bulldog?', say:'How old is your Bulldog?'},
-  ]},
+  { task:'Welche englische Frage passt zur <b>deutschen Frage</b>?', heads:['Deutsch','Englisch'], pool:'L1T' },
 ];
+
+// Level 1, Runde 3 – Übersetzen: pro Fragewort wird ein Satz ausgewählt
+const L1T = {
+  where:[
+    ['Wo ist der Brandmelder?','Where’s the smoke detector?'],
+    ['Wo ist meine Tasche?','Where’s my bag?'],
+    ['Wo sind die Schlüssel?','Where are the keys?'],
+    ['Wo ist das Krankenhaus?','Where’s the hospital?'],
+    ['Wo ist die Feuerwache?','Where’s the fire station?'],
+    ['Wo sind meine Turnschuhe?','Where are my trainers?'],
+    ['Wo ist Mama?','Where’s Mum?'],
+    ['Wo ist das Polizeiauto?','Where’s the police car?'],
+    ['Wo sind die Kinder?','Where are the children?'],
+  ],
+  from:[
+    ['Woher kommst du?','Where are you from?'],
+    ['Woher kommt sie?','Where’s she from?'],
+    ['Woher kommen deine Eltern?','Where are your parents from?'],
+    ['Woher kommt dein Lehrer?','Where’s your teacher from?'],
+    ['Woher kommt Michael Jackson?','Where’s Michael Jackson from?'],
+    ['Woher kommt die Ärztin?','Where’s the doctor from?'],
+    ['Woher kommt dein Freund?','Where’s your friend from?'],
+    ['Woher kommen die Feuerwehrleute?','Where are the firefighters from?'],
+    ['Woher kommt er?','Where’s he from?'],
+  ],
+  who:[
+    ['Wer ist das?','Who’s that?'],
+    ['Wer ist dein Held?','Who’s your hero?'],
+    ['Wer ist an der Tür?','Who’s at the door?'],
+    ['Wer ist deine beste Freundin?','Who’s your best friend?'],
+    ['Wer ist der Mann dort?','Who’s that man?'],
+    ['Wer ist dein Lehrer?','Who’s your teacher?'],
+    ['Wer sind die Kinder?','Who are the children?'],
+    ['Wer ist der King of Pop?','Who’s the King of Pop?'],
+    ['Wer ist am Telefon?','Who’s on the phone?'],
+  ],
+  what:[
+    ['Was ist das?','What’s this?'],
+    ['Was ist in der Kiste?','What’s in the box?'],
+    ['Was ist deine Lieblingsfarbe?','What’s your favourite colour?'],
+    ['Wie heißt du?','What’s your name?'],
+    ['Was ist dein Lieblingstier?','What’s your favourite animal?'],
+    ['Was ist in deiner Tasche?','What’s in your bag?'],
+    ['Was ist das dort?','What’s that?'],
+    ['Was ist dein Hobby?','What’s your hobby?'],
+    ['Was gibt es zum Mittagessen?','What’s for lunch?'],
+  ],
+  howold:[
+    ['Wie alt bist du?','How old are you?'],
+    ['Wie alt ist dein Bulldog?','How old is your Bulldog?'],
+    ['Wie alt ist deine Schwester?','How old is your sister?'],
+    ['Wie alt sind die Zwillinge?','How old are the twins?'],
+    ['Wie alt ist dein Opa?','How old is your grandpa?'],
+    ['Wie alt ist das Feuerwehrauto?','How old is the fire engine?'],
+    ['Wie alt ist dein Hund?','How old is your dog?'],
+    ['Wie alt ist eure Schule?','How old is your school?'],
+    ['Wie alt ist das Baby?','How old is the baby?'],
+  ],
+};
 
 // Level 2 – Frage ↔ Antwort
 const L2 = {
@@ -148,30 +201,76 @@ const L2 = {
     ['Where are the firefighters?','They’re on the ladder.'],
     ['Where’s your Bulldog?','It’s in the garage.'],
     ['Where are the batteries?','They’re under the table.'],
+    ['Where’s my phone?','It’s on your bed.'],
+    ['Where are my shoes?','They’re under the sofa.'],
+    ['Where’s the hospital?','It’s next to the station.'],
+    ['Where’s Grandma?','She’s in the garden.'],
+    ['Where are the children?','They’re at school.'],
+    ['Where’s the cat?','It’s behind the door.'],
+    ['Where’s your school?','It’s in Park Road.'],
+    ['Where are the keys?','They’re in my bag.'],
+    ['Where’s the police car?','It’s in front of the bank.'],
+    ['Where’s Dad?','He’s in the kitchen.'],
   ],
   from:[
     ['Where’s Michael Jackson from?','He’s from Gary, in the USA.'],
     ['Where are you from?','I’m from Bavaria.'],
     ['Where’s the doctor from?','She’s from London.'],
     ['Where are the policemen from?','They’re from Munich.'],
+    ['Where’s your teacher from?','He’s from Ireland.'],
+    ['Where’s Lena from?','She’s from Austria.'],
+    ['Where are your grandparents from?','They’re from Italy.'],
+    ['Where’s the singer from?','She’s from Canada.'],
+    ['Where’s your best friend from?','He’s from Hamburg.'],
+    ['Where are the tourists from?','They’re from Japan.'],
+    ['Where’s Paddington Bear from?','He’s from Peru.'],
+    ['Where’s your new classmate from?','She’s from Poland.'],
+    ['Where are the twins from?','They’re from Cologne.'],
   ],
   who:[
     ['Who’s the King of Pop?','Michael Jackson is the King of Pop.'],
     ['Who’s that man?','He’s a policeman.'],
     ['Who’s your hero?','My hero is a firefighter.'],
     ['Who’s at the door?','It’s the doctor.'],
+    ['Who’s your best friend?','My best friend is Tom.'],
+    ['Who’s that girl?','She’s my sister.'],
+    ['Who’s your teacher?','Mrs Huber is my teacher.'],
+    ['Who are those people?','They’re my grandparents.'],
+    ['Who’s the boy in the photo?','That’s my cousin Max.'],
+    ['Who’s your favourite singer?','Taylor Swift.'],
+    ['Who’s on the phone?','It’s Grandma.'],
+    ['Who’s the new nurse?','Her name is Anna.'],
+    ['Who are the men in blue?','They’re policemen.'],
   ],
   what:[
     ['What’s this?','It’s a smoke detector.'],
     ['What’s in your room?','There’s a fire alarm in my room.'],
     ['What’s your favourite colour?','Red – like a fire engine!'],
     ['What’s that?','It’s an old tractor.'],
+    ['What’s your name?','My name is Mia.'],
+    ['What’s in your bag?','My pencil case and a banana.'],
+    ['What’s your favourite animal?','It’s a dolphin.'],
+    ['What’s for lunch?','Pizza!'],
+    ['What’s your hobby?','Football.'],
+    ['What’s that noise?','It’s the fire alarm!'],
+    ['What’s the dog’s name?','Its name is Bello.'],
+    ['What colour is the police car?','It’s blue and silver.'],
+    ['What’s in the box?','A battery and a wire.'],
   ],
   howold:[
     ['How old is your Bulldog?','It’s sixty years old.'],
     ['How old are you?','I’m eleven.'],
     ['How old is the fire engine?','It’s twenty years old.'],
     ['How old are your cousins?','They’re eight and ten.'],
+    ['How old is your sister?','She’s twelve.'],
+    ['How old is your grandma?','She’s seventy-five.'],
+    ['How old is your school?','It’s a hundred years old.'],
+    ['How old is your teacher?','I think he’s forty.'],
+    ['How old is the baby?','She’s six months old.'],
+    ['How old is your cat?','It’s three years old.'],
+    ['How old is the castle?','It’s eight hundred years old.'],
+    ['How old is your brother?','He’s fifteen.'],
+    ['How old are your parents?','They’re forty and forty-two.'],
   ],
 };
 
@@ -181,26 +280,62 @@ const L3 = {
     ['{W} is the fire station?','It’s next to the park.'],
     ['{W} are my screwdrivers?','They’re in the toolbox.'],
     ['{W}’s the ambulance?','It’s in front of the hospital.'],
+    ['{W} are my glasses?','They’re on your head!'],
+    ['{W}’s the bathroom?','It’s on the left.'],
+    ['{W} is Tom?','He’s in the garden.'],
+    ['{W} are the cats?','They’re on the roof.'],
+    ['{W} is the police station?','It’s in Station Road.'],
+    ['{W}’s my pencil case?','It’s in your schoolbag.'],
+    ['{W} is the bus stop?','It’s in front of the school.'],
+    ['{W} are the fire engines?','They’re at the fire station.'],
   ],
   from:[
     ['{W} is your friend {F}?','He’s from Berlin.'],
     ['{W} are the firefighters {F}?','They’re from Nuremberg.'],
     ['{W} is Dr Brown {F}?','She’s from Scotland.'],
+    ['{W} is Emma {F}?','She’s from Ireland.'],
+    ['{W} are your parents {F}?','They’re from Turkey.'],
+    ['{W}’s the new boy {F}?','He’s from Ukraine.'],
+    ['{W} is the pizza chef {F}?','He’s from Italy.'],
+    ['{W} are you {F}?','I’m from Germany.'],
+    ['{W}’s Paddington Bear {F}?','He’s from Peru.'],
+    ['{W} is your teacher {F}?','She’s from Wales.'],
   ],
   who:[
     ['{W} is that woman?','She’s a doctor.'],
     ['{W}’s on stage?','Michael Jackson!'],
     ['{W} is your teacher?','Mrs Huber.'],
+    ['{W}’s that boy?','He’s my cousin.'],
+    ['{W} is your best friend?','Lisa.'],
+    ['{W} are those men?','They’re firefighters.'],
+    ['{W}’s your favourite singer?','Ed Sheeran.'],
+    ['{W} is at the door?','It’s the postman.'],
+    ['{W}’s the girl with the red hat?','That’s my sister.'],
+    ['{W} is the King of Pop?','Michael Jackson.'],
   ],
   what:[
     ['{W} is in the box?','A battery, a wire and a lamp.'],
     ['{W}’s that?','It’s a police car.'],
     ['{W} is your favourite song?','“Thriller”!'],
+    ['{W}’s your name?','I’m Leon.'],
+    ['{W} is your phone number?','It’s 0911 456 78.'],
+    ['{W}’s in your schoolbag?','Books and a pencil case.'],
+    ['{W} is your favourite food?','Pizza!'],
+    ['{W}’s that noise?','It’s a siren!'],
+    ['{W} colour is your bike?','It’s blue.'],
+    ['{W}’s your hobby?','Swimming.'],
   ],
   howold:[
     ['{W} is your grandpa?','He’s seventy.'],
     ['{W} is the old tractor?','It’s sixty years old.'],
     ['{W} are the twins?','They’re nine.'],
+    ['{W} are you?','I’m eleven.'],
+    ['{W} is your sister?','She’s six.'],
+    ['{W} is the fire engine?','It’s thirty years old.'],
+    ['{W} are your grandparents?','They’re both seventy.'],
+    ['{W} is your dog?','It’s four years old.'],
+    ['{W} is your brother?','He’s thirteen.'],
+    ['{W} is the castle?','It’s five hundred years old.'],
   ],
 };
 
@@ -220,6 +355,13 @@ let S = null;
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
+// Zuletzt gespielte Sätze merken und zuerst die anderen nehmen, damit sich wenig wiederholt.
+function getSeen(){try{return JSON.parse(localStorage.getItem('qw_seen')||'[]');}catch(e){return [];}}
+function markSeen(ids){try{const all=[L1T,L2,L3].reduce((n,p)=>n+CATS.reduce((m,c)=>m+p[c].length,0),0);
+  const s=getSeen().filter(x=>!ids.includes(x)).concat(ids).slice(-Math.floor(all*0.6));
+  localStorage.setItem('qw_seen',JSON.stringify(s));}catch(e){}}
+function freshShuffle(list){const seen=new Set(getSeen()); const id=x=>x.join('|');
+  return shuffle(list.filter(x=>!seen.has(id(x)))).concat(shuffle(list.filter(x=>seen.has(id(x)))));}
 function getBest(){try{return JSON.parse(localStorage.getItem('qw_best')||'{}');}catch(e){return {};}}
 function setBest(l,s){try{const b=getBest(); if(!b[l]||s>b[l]){b[l]=s; localStorage.setItem('qw_best',JSON.stringify(b));}}catch(e){}}
 function starsHTML(n){let h='';for(let i=1;i<=3;i++)h+= i<=n?'⭐':'<span class="star-off">⭐</span>';return h;}
@@ -234,9 +376,17 @@ function wordFor(c){ return c==='from' ? 'Where' : CHIP[c]; }
 
 /* ---------- Runden bauen ---------- */
 function buildRounds(level){
-  if(level===1) return L1.map(r=>({task:r.task, heads:r.heads, even:true, items:r.items.map(x=>({...x, lHTML:x.l, rHTML:x.r, lDone:x.l}))}));
+  if(level===1) return L1.map(r=>{
+    let items=r.items;
+    if(r.pool){
+      const chosen=CATS.map(c=>freshShuffle(L1T[c])[0]);
+      markSeen(chosen.map(x=>x.join('|')));
+      items=CATS.map((c,i)=>({cat:c, l:chosen[i][0], r:chosen[i][1], say:chosen[i][1]}));
+    }
+    return {task:r.task, heads:r.heads, even:true, items:items.map(x=>({...x, lHTML:x.l, rHTML:x.r, lDone:x.l}))};
+  });
   const pool = level===2 ? L2 : L3;
-  const sh = {}; CATS.forEach(c=>sh[c]=shuffle(pool[c]));
+  const sh = {}; CATS.forEach(c=>{ sh[c]=freshShuffle(pool[c]); markSeen(sh[c].slice(0,3).map(x=>x.join('|'))); });
   const rounds=[];
   for(let r=0;r<3;r++){
     const items = CATS.map(c=>{
