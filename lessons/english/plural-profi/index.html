@@ -7,6 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>Plural-Profi – Nomen im Singular und Plural</title>
 <link rel="stylesheet" href="../../../fonts/fonts.css">
+<script src="../../../shared/back.js"></script>
 <style>
   :root{
     --bg:#f4f1ea; --card:#ffffff; --ink:#1d2433; --muted:#5f6b7d; --line:#e3ddd0;
@@ -33,7 +34,9 @@
 
   /* Header */
   .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-  .brand{display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px;flex:1 1 200px}
+  .top{flex-wrap:wrap}
+  .top>.iconbtn{margin-left:auto}
   .badge{width:52px;height:52px;border-radius:16px;background:var(--red);display:grid;place-items:center;font-size:28px;box-shadow:0 4px 0 var(--red-dark)}
   .brand h1{font-size:28px;line-height:1}
   .brand p{margin:3px 0 0;color:var(--muted);font-weight:700;font-size:15px}
@@ -156,6 +159,7 @@
     .snd .e{font-size:34px}.snd .ipa{font-size:24px}.snd .lbl{font-size:11px}
     .brand h1{font-size:23px}
   }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -164,6 +168,7 @@
   <!-- MENU -->
   <section id="menu" class="screen active">
     <div class="top">
+      <appalapp-back></appalapp-back>
       <div class="brand">
         <div class="badge">🚒</div>
         <div><h1>Plural-Profi</h1><p>G1 · Nomen im Singular und Plural</p></div>
@@ -210,8 +215,8 @@
   <!-- WERKSTATT FOCUS -->
   <section id="werkstatt" class="screen">
     <div class="top">
+      <appalapp-back></appalapp-back>
       <div class="brand"><div class="badge">🔧</div><div><h1>Plural-Werkstatt</h1><p>Was willst du heute üben?</p></div></div>
-      <button class="iconbtn" onclick="show('menu')">✕ Menü</button>
     </div>
     <div class="modes">
       <button class="mode m2" onclick="startRound('write','mix')"><div class="emo">🎲</div><h3>Bunter Mix</h3><p>Alle Arten durcheinander – wie in der Schulaufgabe.</p><div class="rec"></div></button>
@@ -224,7 +229,7 @@
   <!-- GAME -->
   <section id="game" class="screen">
     <div class="gamehead">
-      <button class="iconbtn" onclick="quitRound()">✕</button>
+      <appalapp-back></appalapp-back>
       <div class="progress"><i id="bar"></i></div>
       <div class="score" id="score">0 ⭐</div>
     </div>
@@ -233,14 +238,15 @@
 
   <!-- RESULT -->
   <section id="result" class="screen">
+    <div class="top"><appalapp-back></appalapp-back></div>
     <div class="card result" id="resultCard"></div>
   </section>
 
   <!-- CHEAT SHEET -->
   <section id="sheet" class="screen sheet">
     <div class="top">
+      <appalapp-back></appalapp-back>
       <div class="brand"><div class="badge">📋</div><div><h1>Spickzettel</h1><p>Plural bilden & aussprechen</p></div></div>
-      <button class="iconbtn" onclick="show('menu')">✕ Menü</button>
     </div>
 
     <h2>1 · Wie klingt die Endung?</h2>
@@ -570,6 +576,13 @@ function show(id){
   if(id==='menu') renderRecords();
 }
 function openWerkstatt(){show('werkstatt')}
+// Zurück-Pfeil: im Spiel Runde beenden, sonst ins Menü; aus dem Menü zur Übersicht
+window.appBack = () => {
+  const cur=document.querySelector('.screen.active');
+  if(!cur || cur.id==='menu') return false;
+  if(cur.id==='game') quitRound(); else show('menu');
+  return true;
+};
 
 /* ---------- ROUND STATE ---------- */
 let R=null;

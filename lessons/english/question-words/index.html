@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Question Words – Zuordnungsspiel</title>
 <link rel="stylesheet" href="../../../fonts/fonts.css">
+<script src="../../../shared/back.js"></script>
 <style>
   :root{
     --ink:#1d2340; --muted:#5b6180; --bg:#fff8ef; --line:#d9dcea;
@@ -97,6 +98,7 @@
     .grid,.grid.even{grid-template-columns:1fr 1fr;gap:10px 10px}
     .card{padding:10px 10px;min-height:64px;border-radius:14px}
   }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -409,11 +411,15 @@ function buildRounds(level){
 }
 
 /* ---------- Screens ---------- */
+// Zurück-Pfeil: aus Level und Ergebnis ins Menü, aus dem Menü zur Übersicht
+window.appBack = () => { if(!S) return false; menu(); return true; };
+
 function menu(){
   S=null; closeModal();
   const best=getBest();
   app.innerHTML = `
   <div class="wrap">
+    <div class="top"><appalapp-back></appalapp-back></div>
     <div class="hero">
       <h1>Question <span>Words</span></h1>
       <p>Fragen mit Fragewörtern – Where? Who? What? How old?</p>
@@ -446,7 +452,7 @@ function startRound(){
   app.innerHTML = `
   <div class="wrap">
     <div class="top">
-      <button class="icon" onclick="menu()" aria-label="Menü">🏠</button>
+      <appalapp-back></appalapp-back>
       <h2>Level ${S.level}: ${L.t1}</h2>
       <button class="icon" onclick="cheat()" aria-label="Spickzettel">📖</button>
       <button class="icon" onclick="toggleSound(this,true)" aria-label="Ton">${sound?'🔊':'🔇'}</button>
@@ -511,7 +517,7 @@ function endLevel(){
                       ['Geschafft!','Jeder Fehler ist ein Lern-Treffer. Probier’s gleich nochmal – es wird jedes Mal leichter!'];
   const next = S.level<3 ? `<button class="btn red" onclick="startLevel(${S.level+1})">Nächstes Level ➜</button>` : '';
   app.innerHTML = `
-  <div class="wrap"><div class="end">
+  <div class="wrap"><div class="top"><appalapp-back></appalapp-back></div><div class="end">
     <div class="big">${starsHTML(n)}</div>
     <h2>${msg[0]}</h2>
     <p>${msg[1]}<br>Fehlversuche: <b>${e}</b></p>

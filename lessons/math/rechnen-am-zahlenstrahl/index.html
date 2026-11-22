@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rechnen am Zahlenstrahl</title>
 <link rel="stylesheet" href="../../../fonts/fonts.css">
+<script src="../../../shared/back.js"></script>
 <style>
 :root{
   --bg:#E4E9EE; --board:#FFFFFF; --frame:#AAB4BF; --ink:#1E2833; --muted:#5A6672;
@@ -41,6 +42,8 @@ h1{
   font-family:"Kalam", "Comic Sans MS", "Bradley Hand", cursive;
   font-weight:700; font-size:clamp(30px,6vw,44px); line-height:1.1; margin:0 0 8px;
 }
+.titlerow{display:flex; align-items:center; gap:14px; margin:0 0 8px}
+.titlerow h1{margin:0}
 .lead{margin:0 0 28px; color:var(--muted); max-width:62ch}
 .board{
   background:var(--board);
@@ -208,7 +211,10 @@ button.quiet:hover:not(:disabled){background:var(--btn); color:var(--ink)}
 </head>
 <body>
 <main>
-  <h1>Rechnen am Zahlenstrahl</h1>
+  <div class="titlerow">
+    <appalapp-back></appalapp-back>
+    <h1>Rechnen am Zahlenstrahl</h1>
+  </div>
   <p class="lead">Tipp oben in der Rechnung auf eine Zahl mit gestricheltem Rahmen und schreib eine neue hinein. Mit einem x statt einer Zahl rechnest du mit einem Platzhalter. Du kannst auch die Punkte auf dem Zahlenstrahl ziehen.</p>
 
   <section class="board" id="board-sub" aria-labelledby="h-sub">
